@@ -85,6 +85,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_assets: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          file_url: string
+          id: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string
+          id?: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string
+          id?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           bounced: boolean
@@ -263,6 +296,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      outreach_scripts: {
+        Row: {
+          call_to_action: string
+          category: string
+          context: string
+          created_at: string
+          full_template: string
+          hook: string
+          id: string
+          name: string
+          proof: string
+          updated_at: string
+          user_id: string
+          value_proposition: string
+          variables: string[] | null
+        }
+        Insert: {
+          call_to_action?: string
+          category?: string
+          context?: string
+          created_at?: string
+          full_template?: string
+          hook?: string
+          id?: string
+          name: string
+          proof?: string
+          updated_at?: string
+          user_id: string
+          value_proposition?: string
+          variables?: string[] | null
+        }
+        Update: {
+          call_to_action?: string
+          category?: string
+          context?: string
+          created_at?: string
+          full_template?: string
+          hook?: string
+          id?: string
+          name?: string
+          proof?: string
+          updated_at?: string
+          user_id?: string
+          value_proposition?: string
+          variables?: string[] | null
+        }
+        Relationships: []
       }
       pipeline_stages: {
         Row: {

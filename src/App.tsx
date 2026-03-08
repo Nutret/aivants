@@ -13,6 +13,8 @@ import Campaigns from "./pages/Campaigns";
 import Templates from "./pages/Templates";
 import Pipeline from "./pages/Pipeline";
 import Analytics from "./pages/Analytics";
+import Scripts from "./pages/Scripts";
+import ContentLibrary from "./pages/ContentLibrary";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/import" element={<ImportLeads />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/templates" element={<Templates />} />
+              <Route path="/scripts" element={<Scripts />} />
+              <Route path="/content" element={<ContentLibrary />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<SettingsPage />} />
