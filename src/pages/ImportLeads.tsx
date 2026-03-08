@@ -15,30 +15,53 @@ interface ParsedLead {
   company_name: string;
   title: string;
   source: string;
+  website: string;
+  linkedin: string;
+}
+
+function splitCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === "," && !inQuotes) {
+      result.push(current.trim().replace(/^["']|["']$/g, ""));
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim().replace(/^["']|["']$/g, ""));
+  return result;
 }
 
 function parseCSV(text: string): ParsedLead[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
 
-  const headerLine = lines[0];
-  const headers = headerLine.split(",").map((h) => h.trim().toLowerCase().replace(/['"]/g, ""));
+  const headers = splitCSVLine(lines[0]).map((h) => h.toLowerCase().replace(/['"]/g, "").trim());
 
-  const colMap: Record<string, string> = {};
+  const colMap: Record<string, number> = {};
   const aliases: Record<string, string[]> = {
+    full_name: ["full name", "full_name", "name", "contact name", "contact"],
     first_name: ["first_name", "firstname", "first name", "fname"],
     last_name: ["last_name", "lastname", "last name", "lname"],
-    email: ["email", "email_address", "e-mail"],
-    phone: ["phone", "phone_number", "telephone", "tel"],
-    company_name: ["company_name", "company", "organization", "org"],
-    title: ["title", "job_title", "position", "role"],
-    source: ["source", "lead_source", "origin"],
+    email: ["email", "email_address", "e-mail", "mail"],
+    phone: ["phone", "phone_number", "telephone", "tel", "mobile"],
+    company_name: ["company_name", "company", "organization", "org", "company name"],
+    title: ["title", "job_title", "position", "role", "job title"],
+    source: ["source", "lead_source", "origin", "lead source"],
+    website: ["website", "url", "web", "site", "domain"],
+    linkedin: ["linkedin", "linkedin_url", "linkedin url", "linkedin profile"],
   };
 
   headers.forEach((h, i) => {
     for (const [field, names] of Object.entries(aliases)) {
-      if (names.includes(h)) {
-        colMap[field] = String(i);
+      if (names.includes(h) && !(field in colMap)) {
+        colMap[field] = i;
         break;
       }
     }
@@ -47,28 +70,37 @@ function parseCSV(text: string): ParsedLead[] {
   const getVal = (cols: string[], field: string) => {
     const idx = colMap[field];
     if (idx === undefined) return "";
-    return (cols[Number(idx)] || "").trim().replace(/^["']|["']$/g, "");
+    return (cols[idx] || "").trim();
   };
 
   const results: ParsedLead[] = [];
   for (let i = 1; i < lines.length; i++) {
-    // Simple CSV split (handles basic quoting)
-    const cols = lines[i].split(",").map((c) => c.trim());
-    const email = getVal(cols, "email");
-    const firstName = getVal(cols, "first_name");
-    if (!email || !firstName) continue;
+    const cols = splitCSVLine(lines[i]);
 
-    // Basic email validation
+    // Handle "Full Name" → split into first/last
+    let firstName = getVal(cols, "first_name");
+    let lastName = getVal(cols, "last_name");
+    if (!firstName && colMap.full_name !== undefined) {
+      const fullName = getVal(cols, "full_name");
+      const parts = fullName.split(/\s+/);
+      firstName = parts[0] || "";
+      lastName = parts.slice(1).join(" ");
+    }
+
+    const email = getVal(cols, "email");
+    if (!email || !firstName) continue;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
 
     results.push({
       first_name: firstName.slice(0, 100),
-      last_name: getVal(cols, "last_name").slice(0, 100),
+      last_name: lastName.slice(0, 100),
       email: email.slice(0, 255).toLowerCase(),
       phone: getVal(cols, "phone").slice(0, 50),
       company_name: getVal(cols, "company_name").slice(0, 200),
       title: getVal(cols, "title").slice(0, 200),
       source: getVal(cols, "source").slice(0, 100) || "csv_import",
+      website: getVal(cols, "website").slice(0, 500),
+      linkedin: getVal(cols, "linkedin").slice(0, 500),
     });
   }
 
