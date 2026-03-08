@@ -38,6 +38,7 @@ const mainItems = [
   { title: "Scripts", url: "/scripts", icon: ScrollText },
   { title: "Templates", url: "/templates", icon: FileText },
   { title: "Content", url: "/content", icon: FolderOpen },
+  { title: "Sequences", url: "/sequences", icon: Clock },
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
