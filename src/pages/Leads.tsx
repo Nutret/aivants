@@ -183,7 +183,7 @@ export default function Leads() {
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Lead updated" });
     } else {
-      const { error } = await supabase.from("leads").insert({ ...payload, user_id: user.id });
+      const { error } = await supabase.from("leads").insert([{ ...payload, user_id: user.id }] as any);
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Lead created" });
     }
