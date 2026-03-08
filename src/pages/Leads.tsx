@@ -120,6 +120,8 @@ export default function Leads() {
 
   useEffect(() => { fetchLeads(); }, [user]);
 
+  const industries = Array.from(new Set(leads.map((l) => l.industry).filter(Boolean) as string[])).sort();
+
   const filtered = leads.filter((lead) => {
     const matchesSearch =
       !search ||
@@ -127,7 +129,20 @@ export default function Leads() {
         .toLowerCase()
         .includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesRating =
+      ratingFilter === "all" ||
+      (ratingFilter === "4+" && (lead.rating ?? 0) >= 4) ||
+      (ratingFilter === "3+" && (lead.rating ?? 0) >= 3) ||
+      (ratingFilter === "2+" && (lead.rating ?? 0) >= 2) ||
+      (ratingFilter === "unrated" && lead.rating == null);
+    const matchesReviews =
+      reviewsFilter === "all" ||
+      (reviewsFilter === "100+" && (lead.reviews ?? 0) >= 100) ||
+      (reviewsFilter === "50+" && (lead.reviews ?? 0) >= 50) ||
+      (reviewsFilter === "10+" && (lead.reviews ?? 0) >= 10) ||
+      (reviewsFilter === "none" && (!lead.reviews || lead.reviews === 0));
+    const matchesIndustry = industryFilter === "all" || lead.industry === industryFilter;
+    return matchesSearch && matchesStatus && matchesRating && matchesReviews && matchesIndustry;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
