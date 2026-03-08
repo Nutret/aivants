@@ -46,6 +46,7 @@ export default function SettingsPage() {
       if (!error && data) {
         setFromEmail(data.from_email || "");
         setEmailProvider(data.email_provider || "sendgrid");
+        setWebhookSecret((data as any).webhook_secret || "");
         setSettingsId(data.id);
       }
       setLoadingSettings(false);
