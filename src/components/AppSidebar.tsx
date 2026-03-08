@@ -14,6 +14,9 @@ import {
   Clock,
   CalendarClock,
   Radio,
+  Briefcase,
+  FolderKanban,
+  IndianRupee,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,20 +35,36 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Leads", url: "/leads", icon: Users },
+const commandItems = [
+  { title: "Command Center", url: "/", icon: LayoutDashboard },
+];
+
+const leadItems = [
+  { title: "Lead Categories", url: "/leads", icon: Users },
   { title: "All Leads", url: "/leads/all", icon: Users },
-  { title: "Import", url: "/import", icon: Upload },
+  { title: "Import Leads", url: "/import", icon: Upload },
+];
+
+const clientItems = [
+  { title: "Clients", url: "/clients", icon: Briefcase },
+  { title: "Projects", url: "/projects", icon: FolderKanban },
+  { title: "Proposals", url: "/proposals", icon: FileText },
+];
+
+const outreachItems = [
   { title: "Campaigns", url: "/campaigns", icon: Megaphone },
   { title: "Scripts", url: "/scripts", icon: ScrollText },
   { title: "Templates", url: "/templates", icon: FileText },
   { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Sequences", url: "/sequences", icon: Clock },
   { title: "Follow-Ups", url: "/followups", icon: CalendarClock },
+];
+
+const insightItems = [
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
-  { title: "Orchestrator", url: "/orchestrator", icon: Radio },
+  { title: "Revenue", url: "/revenue", icon: IndianRupee },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Orchestrator", url: "/orchestrator", icon: Radio },
 ];
 
 const bottomItems = [
@@ -60,6 +79,31 @@ export function AppSidebar() {
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
+  const renderGroup = (label: string, items: typeof commandItems) => (
+    <SidebarGroup key={label}>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                <NavLink
+                  to={item.url}
+                  end={item.url === "/"}
+                  className="hover:bg-sidebar-accent"
+                  activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                >
+                  <item.icon className="h-4 w-4" />
+                  {!collapsed && <span>{item.title}</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -77,28 +121,11 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="hover:bg-sidebar-accent"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {renderGroup("Home", commandItems)}
+        {renderGroup("Lead Management", leadItems)}
+        {renderGroup("Clients & Projects", clientItems)}
+        {renderGroup("Outreach", outreachItems)}
+        {renderGroup("Insights & Revenue", insightItems)}
       </SidebarContent>
 
       <SidebarFooter>

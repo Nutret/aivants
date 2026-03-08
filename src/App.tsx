@@ -22,6 +22,10 @@ import Sequences from "./pages/Sequences";
 import FollowUps from "./pages/FollowUps";
 import Orchestrator from "./pages/Orchestrator";
 import SettingsPage from "./pages/SettingsPage";
+import Clients from "./pages/Clients";
+import Projects from "./pages/Projects";
+import Proposals from "./pages/Proposals";
+import Revenue from "./pages/Revenue";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +68,10 @@ const App = () => (
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/orchestrator" element={<Orchestrator />} />
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/proposals" element={<Proposals />} />
+              <Route path="/revenue" element={<Revenue />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
