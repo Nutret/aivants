@@ -14,7 +14,267 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      campaigns: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          subject: string | null
+          template_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          domain: string | null
+          id: string
+          industry: string | null
+          name: string
+          size: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          size?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          size?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_logs: {
+        Row: {
+          bounced: boolean
+          campaign_id: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          opened_at: string | null
+          replied_at: string | null
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          bounced?: boolean
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          sent_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          bounced?: boolean
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          replied_at?: string | null
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string | null
+          notes: string | null
+          phone: string | null
+          score: number | null
+          source: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string | null
+          notes?: string | null
+          phone?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pipeline_stages: {
+        Row: {
+          client_won: boolean
+          created_at: string
+          id: string
+          lead_id: string
+          meeting_booked: boolean
+          stage: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_won?: boolean
+          created_at?: string
+          id?: string
+          lead_id: string
+          meeting_booked?: boolean
+          stage?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_won?: boolean
+          created_at?: string
+          id?: string
+          lead_id?: string
+          meeting_booked?: boolean
+          stage?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_stages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
