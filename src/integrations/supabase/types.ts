@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_settings: {
+        Row: {
+          api_key: string | null
+          created_at: string
+          id: string
+          max_tokens: number | null
+          model_name: string | null
+          provider: string
+          temperature: number | null
+          updated_at: string
+          user_id: string
+          widget_enabled: boolean
+        }
+        Insert: {
+          api_key?: string | null
+          created_at?: string
+          id?: string
+          max_tokens?: number | null
+          model_name?: string | null
+          provider?: string
+          temperature?: number | null
+          updated_at?: string
+          user_id: string
+          widget_enabled?: boolean
+        }
+        Update: {
+          api_key?: string | null
+          created_at?: string
+          id?: string
+          max_tokens?: number | null
+          model_name?: string | null
+          provider?: string
+          temperature?: number | null
+          updated_at?: string
+          user_id?: string
+          widget_enabled?: boolean
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           created_at: string
@@ -99,6 +168,68 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          tool_calls: Json | null
+          tool_results: Json | null
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          tool_calls?: Json | null
+          tool_results?: Json | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          tool_calls?: Json | null
+          tool_results?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
             referencedColumns: ["id"]
           },
         ]
