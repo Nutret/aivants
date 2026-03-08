@@ -363,6 +363,8 @@ Today's date: ${new Date().toISOString().split("T")[0]}`;
       ...messages.map((m: any) => ({ role: m.role, content: m.content })),
     ];
 
+    console.log("API call:", JSON.stringify({ url: apiUrl, model, keyFirst10: apiKey.substring(0, 10), provider }));
+
     const firstResponse = await fetch(apiUrl, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
