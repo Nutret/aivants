@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { isPast, isToday, isFuture, parseISO, addDays } from "date-fns";
 import { FollowUpItemCard, type FollowUpItemData } from "@/components/followups/FollowUpItemCard";
 import { CreateFollowUpDialog, type CreateFollowUpData } from "@/components/followups/CreateFollowUpDialog";
+import { FollowUpAnalytics } from "@/components/followups/FollowUpAnalytics";
+import { BarChart3 } from "lucide-react";
 
 interface Lead { id: string; first_name: string; last_name: string | null; email: string; company_name: string | null; }
 interface Sequence { id: string; name: string; followup_type: string; }
