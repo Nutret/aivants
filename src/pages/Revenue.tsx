@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   IndianRupee, Plus, TrendingUp, TrendingDown, Wallet, Users, CreditCard,
-  BarChart3, Trash2, Edit, ArrowUpRight, ArrowDownRight, Target
+  BarChart3, Trash2, Edit, ArrowUpRight, ArrowDownRight, Target, Download
 } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import {
@@ -243,6 +243,34 @@ export default function Revenue() {
 
   const fmt = (v: number) => `₹${v.toLocaleString("en-IN", { minimumFractionDigits: 0 })}`;
 
+  function exportCSV() {
+    const headers = ["Date", "Type", "Category", "Description", "Amount", "Client", "Recurring", "Interval", "Notes"];
+    const rows = entries.map(e => {
+      const client = clients.find(c => c.id === e.client_id);
+      const catLabel = [...CATEGORIES.payment, ...CATEGORIES.cost].find(c => c.value === e.category)?.label || e.category;
+      return [
+        e.date,
+        e.type,
+        catLabel,
+        `"${e.description.replace(/"/g, '""')}"`,
+        e.amount,
+        client ? `"${client.name}"` : "",
+        e.is_recurring ? "Yes" : "No",
+        e.recurring_interval || "",
+        `"${(e.notes || "").replace(/"/g, '""')}"`,
+      ].join(",");
+    });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `revenue-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${entries.length} entries downloaded` });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -251,6 +279,9 @@ export default function Revenue() {
           <p className="text-muted-foreground">Financial overview — revenue, costs, profit & growth projections</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={exportCSV} className="gap-1" disabled={entries.length === 0}>
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
           <Button onClick={() => openCreate("payment")} className="gap-1">
             <Plus className="h-4 w-4" /> Add Payment
           </Button>
