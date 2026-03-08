@@ -50,7 +50,10 @@ const App = () => (
               }
             >
               <Route path="/" element={<Index />} />
-              <Route path="/leads" element={<Leads />} />
+              <Route path="/leads" element={<LeadCategories />} />
+              <Route path="/leads/all" element={<Leads />} />
+              <Route path="/leads/category/:categoryId" element={<CategoryDetail />} />
+              <Route path="/leads/sheet/:sheetId" element={<SheetDetail />} />
               <Route path="/import" element={<ImportLeads />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/templates" element={<Templates />} />
