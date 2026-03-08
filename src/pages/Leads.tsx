@@ -92,9 +92,11 @@ export default function Leads() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
   const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const perPage = 10;
 
   const fetchLeads = async () => {
