@@ -274,7 +274,6 @@ export default function Leads() {
   };
 
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
-  };
 
   return (
     <div className="space-y-6">
