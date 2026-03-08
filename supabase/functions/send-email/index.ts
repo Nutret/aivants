@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { to, subject, body, lead_id, campaign_id, from_email } = await req.json();
+    const { to, subject, body, lead_id, campaign_id, from_email, attachment_url, attachment_name } = await req.json();
 
     if (!to || !subject || !body) {
       return new Response(JSON.stringify({ error: "Missing required fields: to, subject, body" }), {
@@ -54,7 +54,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const senderEmail = from_email || "noreply@example.com";
+    // Get sender email: use provided, else fetch from user_settings
+    let senderEmail = from_email;
+    if (!senderEmail) {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { data: settings } = await serviceClient
+        .from("user_settings")
+        .select("from_email")
+        .eq("user_id", user.id)
+        .single();
+      senderEmail = settings?.from_email || null;
+    }
+
+    if (!senderEmail) {
+      return new Response(JSON.stringify({ 
+        error: "No verified sender email configured. Go to Settings → Email to set your 'From Email' address. This must match a verified Sender Identity in your SendGrid account." 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Send via SendGrid
     const sgResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
