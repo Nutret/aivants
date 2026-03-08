@@ -243,6 +243,34 @@ export default function Revenue() {
 
   const fmt = (v: number) => `₹${v.toLocaleString("en-IN", { minimumFractionDigits: 0 })}`;
 
+  function exportCSV() {
+    const headers = ["Date", "Type", "Category", "Description", "Amount", "Client", "Recurring", "Interval", "Notes"];
+    const rows = entries.map(e => {
+      const client = clients.find(c => c.id === e.client_id);
+      const catLabel = [...CATEGORIES.payment, ...CATEGORIES.cost].find(c => c.value === e.category)?.label || e.category;
+      return [
+        e.date,
+        e.type,
+        catLabel,
+        `"${e.description.replace(/"/g, '""')}"`,
+        e.amount,
+        client ? `"${client.name}"` : "",
+        e.is_recurring ? "Yes" : "No",
+        e.recurring_interval || "",
+        `"${(e.notes || "").replace(/"/g, '""')}"`,
+      ].join(",");
+    });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `revenue-export-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${entries.length} entries downloaded` });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
