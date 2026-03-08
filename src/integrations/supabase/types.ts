@@ -381,15 +381,24 @@ export type Database = {
       followup_status: {
         Row: {
           campaign_id: string | null
+          category: string
+          client_company: string | null
+          client_email: string | null
+          client_name: string | null
           condition_stop_on: string | null
           created_at: string
           current_step: number
+          end_date: string | null
           followup_type: string
           id: string
           last_email_sent_at: string | null
           lead_id: string
           next_followup_date: string | null
+          notes: string | null
+          purpose: string | null
           scheduled_date: string | null
+          sender_email: string | null
+          sender_name: string | null
           sequence_id: string
           status: string
           updated_at: string
@@ -397,15 +406,24 @@ export type Database = {
         }
         Insert: {
           campaign_id?: string | null
+          category?: string
+          client_company?: string | null
+          client_email?: string | null
+          client_name?: string | null
           condition_stop_on?: string | null
           created_at?: string
           current_step?: number
+          end_date?: string | null
           followup_type?: string
           id?: string
           last_email_sent_at?: string | null
           lead_id: string
           next_followup_date?: string | null
+          notes?: string | null
+          purpose?: string | null
           scheduled_date?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           sequence_id: string
           status?: string
           updated_at?: string
@@ -413,15 +431,24 @@ export type Database = {
         }
         Update: {
           campaign_id?: string | null
+          category?: string
+          client_company?: string | null
+          client_email?: string | null
+          client_name?: string | null
           condition_stop_on?: string | null
           created_at?: string
           current_step?: number
+          end_date?: string | null
           followup_type?: string
           id?: string
           last_email_sent_at?: string | null
           lead_id?: string
           next_followup_date?: string | null
+          notes?: string | null
+          purpose?: string | null
           scheduled_date?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           sequence_id?: string
           status?: string
           updated_at?: string
