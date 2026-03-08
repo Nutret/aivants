@@ -316,8 +316,8 @@ export default function Leads() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-lg">All Leads ({filtered.length})</CardTitle>
-            <div className="flex gap-2">
-              <div className="relative flex-1 sm:w-64">
+            <div className="flex flex-wrap gap-2">
+              <div className="relative flex-1 sm:w-56">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search leads..."
@@ -327,8 +327,7 @@ export default function Leads() {
                 />
               </div>
               <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-                <SelectTrigger className="w-[160px]">
-                  <Filter className="h-4 w-4 mr-2" />
+                <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -339,6 +338,43 @@ export default function Leads() {
                   <SelectItem value="meeting">Meeting</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={ratingFilter} onValueChange={(v) => { setRatingFilter(v); setPage(1); }}>
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ratings</SelectItem>
+                  <SelectItem value="4+">★ 4+</SelectItem>
+                  <SelectItem value="3+">★ 3+</SelectItem>
+                  <SelectItem value="2+">★ 2+</SelectItem>
+                  <SelectItem value="unrated">Unrated</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={reviewsFilter} onValueChange={(v) => { setReviewsFilter(v); setPage(1); }}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Reviews" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Reviews</SelectItem>
+                  <SelectItem value="100+">100+ reviews</SelectItem>
+                  <SelectItem value="50+">50+ reviews</SelectItem>
+                  <SelectItem value="10+">10+ reviews</SelectItem>
+                  <SelectItem value="none">No reviews</SelectItem>
+                </SelectContent>
+              </Select>
+              {industries.length > 0 && (
+                <Select value={industryFilter} onValueChange={(v) => { setIndustryFilter(v); setPage(1); }}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Industries</SelectItem>
+                    {industries.map((ind) => (
+                      <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
         </CardHeader>
