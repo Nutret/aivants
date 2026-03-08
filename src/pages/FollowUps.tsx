@@ -388,7 +388,10 @@ export default function FollowUps() {
               <TabsContent value="upcoming" className="mt-4">{renderList(upcomingItems, "No upcoming client follow-ups")}</TabsContent>
               <TabsContent value="paused" className="mt-4">{renderList(pausedItems, "No paused client follow-ups")}</TabsContent>
               <TabsContent value="completed" className="mt-4">{renderList(completedItems, "No completed client follow-ups")}</TabsContent>
-            </Tabs>
+        <TabsContent value="analytics" className="mt-4">
+          <FollowUpAnalytics />
+        </TabsContent>
+      </Tabs>
           )}
         </TabsContent>
       </Tabs>
