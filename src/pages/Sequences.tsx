@@ -32,6 +32,7 @@ interface Sequence {
 
 interface Step {
   id: string;
+  sequence_id?: string;
   step_number: number;
   delay_days: number;
   script_id: string | null;
