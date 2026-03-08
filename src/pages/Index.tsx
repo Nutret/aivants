@@ -1,115 +1,141 @@
+import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useCommandCenterData } from "@/hooks/useCommandCenterData";
+import { KPICard, KPISection } from "@/components/command-center/KPIGrid";
+import { QuickActions } from "@/components/command-center/QuickActions";
+import { ActivityTimeline } from "@/components/command-center/ActivityTimeline";
+import { DealPipelineVisual } from "@/components/command-center/DealPipelineVisual";
+import { ClientHealthTable } from "@/components/command-center/ClientHealthTable";
+import { FinancialHealth } from "@/components/command-center/FinancialHealth";
+import { AIOpportunityScanner, AIAssistant } from "@/components/command-center/AIInsights";
 import {
-  Users, Briefcase, FolderKanban, FileText, IndianRupee, Settings, ArrowRight,
+  HighValueLeads, LeadSources, AutomationMonitor, SystemHealth, RevenuePrediction,
+} from "@/components/command-center/SmallWidgets";
+import {
+  Users, Mail, MessageSquare, CalendarCheck, Briefcase, FolderKanban,
+  IndianRupee, CreditCard, Wallet, UsersRound, Clock, Megaphone, Eye, Reply, Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const sections = [
-  {
-    title: "Lead Management",
-    description: "Organize leads by industry, manage sheets, import & track prospects",
-    icon: Users,
-    path: "/leads",
-    gradient: "from-primary/20 to-primary/5",
-    iconBg: "bg-primary/15 text-primary",
-  },
-  {
-    title: "Client Management",
-    description: "Manage active clients, contracts, and communications",
-    icon: Briefcase,
-    path: "/clients",
-    gradient: "from-accent/20 to-accent/5",
-    iconBg: "bg-accent/15 text-accent",
-  },
-  {
-    title: "Client Project Management",
-    description: "Track projects, assign teams, manage deadlines & milestones",
-    icon: FolderKanban,
-    path: "/projects",
-    gradient: "from-warning/20 to-warning/5",
-    iconBg: "bg-warning/15 text-warning",
-  },
-  {
-    title: "Proposal Management",
-    description: "Create, store, and share proposals with clients instantly",
-    icon: FileText,
-    path: "/proposals",
-    gradient: "from-chart-4/20 to-chart-4/5",
-    iconBg: "bg-[hsl(280,65%,55%)]/15 text-[hsl(280,65%,55%)]",
-  },
-  {
-    title: "Revenue Dashboard",
-    description: "Financial overview — revenue, costs, profit & growth projections",
-    icon: IndianRupee,
-    path: "/revenue",
-    gradient: "from-success/20 to-success/5",
-    iconBg: "bg-success/15 text-success",
-  },
-  {
-    title: "General System",
-    description: "Campaigns, templates, sequences, follow-ups, pipeline & settings",
-    icon: Settings,
-    path: "/campaigns",
-    gradient: "from-muted-foreground/10 to-muted/5",
-    iconBg: "bg-muted text-muted-foreground",
-  },
-];
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-};
+const fmt = (v: number) => `₹${v.toLocaleString("en-IN")}`;
 
 export default function Index() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const data = useCommandCenterData();
   const firstName = user?.user_metadata?.first_name || user?.email?.split("@")[0] || "there";
 
+  // Build business context string for AI features
+  const businessContext = useMemo(() => {
+    const lo = data.leadsOverview;
+    const co = data.clientsOverview;
+    const rs = data.revenueSnapshot;
+    const oe = data.outreachEngine;
+    const fh = data.financialHealth;
+    const dp = data.dealPipeline;
+    return `Business Summary:
+Leads: ${lo.totalLeads} total, ${lo.newLeads} new, ${lo.leadsToday} today
+Emails: ${lo.emailsSent} sent, ${lo.replies} replies, ${lo.meetingsBooked} meetings booked
+Clients: ${co.activeClients} active, ${co.activeProjects} projects running
+Revenue this month: ₹${rs.monthlyRevenue}, Costs: ₹${rs.costs}, Profit: ₹${rs.profit}
+Outreach: ${oe.totalSent} emails, ${oe.openRate.toFixed(0)}% open rate, ${oe.replyRate.toFixed(0)}% reply rate
+Pipeline: ${dp.map(s => `${s.stage}: ${s.count}`).join(", ")}
+Total revenue all-time: ₹${fh.totalRevenue}, expenses: ₹${fh.totalExpenses}
+Client health issues: ${data.clientHealth.filter(c => c.healthScore !== "good").length} clients need attention
+High value leads: ${data.highValueLeads.length}`;
+  }, [data]);
+
+  if (data.loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto py-8 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">
-          Aivants Command Center
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Welcome back, {firstName}. Where do you want to go?
-        </p>
+    <div className="space-y-6 pb-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Command Center</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {firstName}. Here's your business at a glance.
+          </p>
+        </div>
       </div>
 
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {sections.map((section) => (
-          <motion.div
-            key={section.title}
-            variants={item}
-            onClick={() => navigate(section.path)}
-            className={`group relative cursor-pointer rounded-xl border bg-gradient-to-br ${section.gradient} p-6 transition-all hover:shadow-lg hover:scale-[1.02] hover:border-primary/30`}
-          >
-            <div className="flex items-start justify-between">
-              <div className={`rounded-lg p-3 ${section.iconBg}`}>
-                <section.icon className="h-6 w-6" />
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-            </div>
-            <div className="mt-4 space-y-1">
-              <h2 className="text-lg font-semibold">{section.title}</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {section.description}
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+      {/* Quick Actions */}
+      <QuickActions />
+
+      {/* Section 1 — Leads Overview */}
+      <KPISection title="Leads Overview">
+        <KPICard label="Leads Today" value={data.leadsOverview.leadsToday} icon={Users} color="text-primary" />
+        <KPICard label="New Leads" value={data.leadsOverview.newLeads} icon={Users} color="text-accent" />
+        <KPICard label="Emails Sent" value={data.leadsOverview.emailsSent} icon={Mail} color="text-warning" />
+        <KPICard label="Replies" value={data.leadsOverview.replies} icon={MessageSquare} color="text-success" />
+        <KPICard label="Meetings Booked" value={data.leadsOverview.meetingsBooked} icon={CalendarCheck} color="text-primary" />
+      </KPISection>
+
+      {/* Section 2 — Clients */}
+      <KPISection title="Clients">
+        <KPICard label="Active Clients" value={data.clientsOverview.activeClients} icon={Briefcase} color="text-accent" />
+        <KPICard label="Projects Running" value={data.clientsOverview.activeProjects} icon={FolderKanban} color="text-primary" />
+        <KPICard label="Pending Payments" value={data.clientsOverview.pendingPayments} icon={CreditCard} color="text-warning" />
+      </KPISection>
+
+      {/* Section 3 — Revenue Snapshot */}
+      <KPISection title="Revenue Snapshot">
+        <KPICard label="Monthly Revenue" value={fmt(data.revenueSnapshot.monthlyRevenue)} icon={IndianRupee} color="text-success" />
+        <KPICard label="Client Retainers" value={fmt(data.revenueSnapshot.retainers)} icon={IndianRupee} color="text-accent" />
+        <KPICard label="Pending" value={fmt(data.revenueSnapshot.pendingPayments)} icon={CreditCard} color="text-warning" />
+        <KPICard label="Net Profit" value={fmt(data.revenueSnapshot.profit)} icon={Wallet} color={data.revenueSnapshot.profit >= 0 ? "text-success" : "text-destructive"} />
+      </KPISection>
+
+      {/* Section 4 — Team Activity */}
+      <KPISection title="Team Activity">
+        <KPICard label="Active Members" value={data.teamActivity.activeMembers} icon={UsersRound} color="text-primary" subtext={`of ${data.teamActivity.totalMembers} total`} />
+        <KPICard label="Deadlines This Week" value={data.teamActivity.projectsNearDeadline} icon={Clock} color="text-warning" />
+      </KPISection>
+
+      {/* Section 5 — Outreach Engine */}
+      <KPISection title="Outreach Engine">
+        <KPICard label="Campaigns" value={data.outreachEngine.activeCampaigns} icon={Megaphone} color="text-primary" subtext={`of ${data.outreachEngine.totalCampaigns} total`} />
+        <KPICard label="Emails Today" value={data.outreachEngine.emailsToday} icon={Mail} color="text-accent" />
+        <KPICard label="Open Rate" value={`${data.outreachEngine.openRate.toFixed(0)}%`} icon={Eye} color="text-success" />
+        <KPICard label="Reply Rate" value={`${data.outreachEngine.replyRate.toFixed(0)}%`} icon={Reply} color="text-warning" />
+      </KPISection>
+
+      {/* Row: Pipeline + Activity + Client Health */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <DealPipelineVisual stages={data.dealPipeline} />
+        <ActivityTimeline items={data.activityTimeline} />
+        <ClientHealthTable clients={data.clientHealth} />
+      </div>
+
+      {/* Row: AI Opportunity Scanner + AI Assistant */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <AIOpportunityScanner businessContext={businessContext} />
+        <AIAssistant businessContext={businessContext} />
+      </div>
+
+      {/* Row: Revenue Prediction + Financial Health + High Value Leads */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <RevenuePrediction
+          current={data.revenueProjection.current}
+          nextMonth={data.revenueProjection.nextMonth}
+          sixMonths={data.revenueProjection.sixMonths}
+          conversionRate={data.revenueProjection.conversionRate}
+        />
+        <FinancialHealth {...data.financialHealth} />
+        <HighValueLeads leads={data.highValueLeads} />
+      </div>
+
+      {/* Row: Lead Sources + Automation Monitor + System Health */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <LeadSources sources={data.leadSources} />
+        <AutomationMonitor data={data.automationMonitor} />
+        <SystemHealth />
+      </div>
     </div>
   );
 }
