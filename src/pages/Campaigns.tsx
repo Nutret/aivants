@@ -5,24 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Play, Pause, Pencil, Trash2 } from "lucide-react";
+import { Plus, Play, Pause, Pencil, Trash2, Sparkles, Loader2, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +27,9 @@ interface Campaign {
   updated_at: string;
   emailStats?: { sent: number; openRate: number; replyRate: number; bounceRate: number };
 }
+
+interface Script { id: string; name: string; category: string; hook: string; context: string; value_proposition: string; proof: string; call_to_action: string; }
+interface Lead { id: string; first_name: string; last_name: string | null; company_name: string | null; industry: string | null; location: string | null; title: string | null; email: string; }
 
 function getStatusBadge(status: string) {
   switch (status) {
@@ -56,6 +50,17 @@ export default function Campaigns() {
   const [editing, setEditing] = useState<Campaign | null>(null);
   const [form, setForm] = useState({ name: "", subject: "", status: "draft" });
 
+  // AI Generate state
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [scripts, setScripts] = useState<Script[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [selectedScriptId, setSelectedScriptId] = useState<string>("none");
+  const [selectedLeadId, setSelectedLeadId] = useState<string>("none");
+  const [campaignGoal, setCampaignGoal] = useState("Generate interest and book a meeting");
+  const [generating, setGenerating] = useState(false);
+  const [generatedSubject, setGeneratedSubject] = useState("");
+  const [generatedBody, setGeneratedBody] = useState("");
+
   const fetchCampaigns = async () => {
     if (!user) return;
     setLoading(true);
@@ -72,7 +77,6 @@ export default function Campaigns() {
       return;
     }
 
-    // Fetch email stats per campaign
     const { data: logs } = await supabase
       .from("email_logs")
       .select("campaign_id, opened_at, replied_at, bounced")
@@ -108,9 +112,7 @@ export default function Campaigns() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchCampaigns();
-  }, [user]);
+  useEffect(() => { fetchCampaigns(); }, [user]);
 
   const openCreate = () => {
     setEditing(null);
@@ -165,6 +167,69 @@ export default function Campaigns() {
     fetchCampaigns();
   };
 
+  // AI Generate
+  const openAiGenerate = async () => {
+    if (!user) return;
+    const [scriptRes, leadRes] = await Promise.all([
+      supabase.from("outreach_scripts").select("id, name, category, hook, context, value_proposition, proof, call_to_action").eq("user_id", user.id),
+      supabase.from("leads").select("id, first_name, last_name, company_name, industry, location, title, email").eq("user_id", user.id).limit(100),
+    ]);
+    setScripts((scriptRes.data as Script[]) || []);
+    setLeads((leadRes.data as Lead[]) || []);
+    setSelectedScriptId("none");
+    setSelectedLeadId("none");
+    setGeneratedSubject("");
+    setGeneratedBody("");
+    setCampaignGoal("Generate interest and book a meeting");
+    setAiDialogOpen(true);
+  };
+
+  const handleGenerate = async () => {
+    if (selectedScriptId === "none" || selectedLeadId === "none") {
+      toast({ title: "Select a script and lead", variant: "destructive" });
+      return;
+    }
+
+    const script = scripts.find((s) => s.id === selectedScriptId);
+    const lead = leads.find((l) => l.id === selectedLeadId);
+    if (!script || !lead) return;
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-generate-email", {
+        body: {
+          script_template: {
+            hook: script.hook,
+            context: script.context,
+            value_proposition: script.value_proposition,
+            proof: script.proof,
+            call_to_action: script.call_to_action,
+          },
+          lead: {
+            first_name: lead.first_name,
+            last_name: lead.last_name,
+            company_name: lead.company_name,
+            industry: lead.industry,
+            location: lead.location,
+            title: lead.title,
+          },
+          campaign_goal: campaignGoal,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setGeneratedSubject(data.subject || "");
+      setGeneratedBody(data.body || "");
+      toast({ title: "Email generated!" });
+    } catch (err: any) {
+      toast({ title: "Generation failed", description: err.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -172,10 +237,16 @@ export default function Campaigns() {
           <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
           <p className="text-muted-foreground">Manage your outreach campaigns</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Campaign
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={openAiGenerate}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Generate
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Campaign
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -269,6 +340,78 @@ export default function Campaigns() {
             <Button onClick={handleSave} disabled={!form.name.trim()}>
               {editing ? "Save Changes" : "Create Campaign"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Generate Dialog */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              AI Email Generator
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Select Script *</Label>
+                <Select value={selectedScriptId} onValueChange={setSelectedScriptId}>
+                  <SelectTrigger><SelectValue placeholder="Choose a script" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" disabled>Choose a script</SelectItem>
+                    {scripts.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name} ({s.category.replace("_", " ")})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Select Lead *</Label>
+                <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
+                  <SelectTrigger><SelectValue placeholder="Choose a lead" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" disabled>Choose a lead</SelectItem>
+                    {leads.map((l) => (
+                      <SelectItem key={l.id} value={l.id}>
+                        {l.first_name} {l.last_name || ""} — {l.company_name || l.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Campaign Goal</Label>
+              <Input value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)} placeholder="e.g. Book a demo call" />
+            </div>
+
+            <Button onClick={handleGenerate} disabled={generating || selectedScriptId === "none" || selectedLeadId === "none"}>
+              {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generating…</> : <><Sparkles className="h-4 w-4 mr-2" />Generate Email</>}
+            </Button>
+
+            {generatedSubject && (
+              <div className="space-y-3 mt-4 rounded-lg border bg-muted/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Eye className="h-4 w-4" />
+                  Generated Email Preview
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Subject</Label>
+                  <Input value={generatedSubject} onChange={(e) => setGeneratedSubject(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Body</Label>
+                  <Textarea value={generatedBody} onChange={(e) => setGeneratedBody(e.target.value)} rows={8} className="text-sm" />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

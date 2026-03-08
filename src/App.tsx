@@ -15,6 +15,7 @@ import Pipeline from "./pages/Pipeline";
 import Analytics from "./pages/Analytics";
 import Scripts from "./pages/Scripts";
 import ContentLibrary from "./pages/ContentLibrary";
+import Sequences from "./pages/Sequences";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/templates" element={<Templates />} />
               <Route path="/scripts" element={<Scripts />} />
               <Route path="/content" element={<ContentLibrary />} />
+              <Route path="/sequences" element={<Sequences />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<SettingsPage />} />

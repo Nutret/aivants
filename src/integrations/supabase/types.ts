@@ -205,6 +205,179 @@ export type Database = {
         }
         Relationships: []
       }
+      followup_sequences: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "followup_sequences_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      followup_status: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          current_step: number
+          id: string
+          last_email_sent_at: string | null
+          lead_id: string
+          next_followup_date: string | null
+          sequence_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          last_email_sent_at?: string | null
+          lead_id: string
+          next_followup_date?: string | null
+          sequence_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          last_email_sent_at?: string | null
+          lead_id?: string
+          next_followup_date?: string | null
+          sequence_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "followup_status_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followup_status_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followup_status_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "followup_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      followup_steps: {
+        Row: {
+          body_override: string | null
+          channel: string
+          content_asset_id: string | null
+          created_at: string
+          delay_days: number
+          id: string
+          script_id: string | null
+          sequence_id: string
+          step_number: number
+          subject_override: string | null
+          template_id: string | null
+        }
+        Insert: {
+          body_override?: string | null
+          channel?: string
+          content_asset_id?: string | null
+          created_at?: string
+          delay_days?: number
+          id?: string
+          script_id?: string | null
+          sequence_id: string
+          step_number?: number
+          subject_override?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          body_override?: string | null
+          channel?: string
+          content_asset_id?: string | null
+          created_at?: string
+          delay_days?: number
+          id?: string
+          script_id?: string | null
+          sequence_id?: string
+          step_number?: number
+          subject_override?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "followup_steps_content_asset_id_fkey"
+            columns: ["content_asset_id"]
+            isOneToOne: false
+            referencedRelation: "content_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followup_steps_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_scripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followup_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "followup_sequences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followup_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
