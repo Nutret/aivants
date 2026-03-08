@@ -108,7 +108,43 @@ export default function SettingsPage() {
     }
   };
 
-  return (
+  const generateSecret = () => {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+  };
+
+  const handleSaveWebhookSecret = async () => {
+    if (!user) return;
+    setSavingWebhook(true);
+    try {
+      if (settingsId) {
+        const { error } = await supabase
+          .from("user_settings")
+          .update({ webhook_secret: webhookSecret || null, updated_at: new Date().toISOString() } as any)
+          .eq("id", settingsId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("user_settings")
+          .insert({ user_id: user.id, webhook_secret: webhookSecret || null } as any)
+          .select()
+          .single();
+        if (error) throw error;
+        setSettingsId(data.id);
+      }
+      toast({ title: "Saved!", description: "Webhook secret updated." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingWebhook(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied to clipboard" });
+  };
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
