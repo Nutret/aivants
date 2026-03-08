@@ -696,6 +696,7 @@ export type Database = {
           id: string
           is_active: boolean
           linked_at: string
+          notification_prefs: Json
           telegram_chat_id: number
           telegram_username: string | null
           user_id: string
@@ -704,6 +705,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           linked_at?: string
+          notification_prefs?: Json
           telegram_chat_id: number
           telegram_username?: string | null
           user_id: string
@@ -712,6 +714,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           linked_at?: string
+          notification_prefs?: Json
           telegram_chat_id?: number
           telegram_username?: string | null
           user_id?: string

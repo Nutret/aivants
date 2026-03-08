@@ -333,12 +333,13 @@ Deno.serve(async (req) => {
       if (BOT_TOKEN) {
         const { data: tgUser } = await serviceClient
           .from("telegram_users")
-          .select("telegram_chat_id")
+          .select("telegram_chat_id, notification_prefs")
           .eq("user_id", lead.user_id)
           .eq("is_active", true)
           .maybeSingle();
 
-        if (tgUser?.telegram_chat_id) {
+        const replyNotifEnabled = tgUser?.notification_prefs?.replies !== false;
+        if (tgUser?.telegram_chat_id && replyNotifEnabled) {
           const emoji = priority === "high" ? "🔥" : classification === "meeting_request" ? "📅" : "💬";
           const tgMsg =
             `${emoji} <b>New Lead Reply</b>\n\n` +

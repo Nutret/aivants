@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw, MessageCircle, Link2, Unlink } from "lucide-react";
+import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw, MessageCircle, Link2, Unlink, Bell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -31,6 +32,8 @@ export default function SettingsPage() {
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [savingTelegram, setSavingTelegram] = useState(false);
   const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState({ replies: true, meetings: true, campaigns: true });
+  const [savingNotifPrefs, setSavingNotifPrefs] = useState(false);
 
   // Test email state
   const [sending, setSending] = useState(false);
@@ -67,6 +70,8 @@ export default function SettingsPage() {
         setTelegramLinked(true);
         setTelegramChatId(String((tgData as any).telegram_chat_id || ""));
         setTelegramUsername((tgData as any).telegram_username || null);
+        const prefs = (tgData as any).notification_prefs;
+        if (prefs) setNotifPrefs({ replies: prefs.replies ?? true, meetings: prefs.meetings ?? true, campaigns: prefs.campaigns ?? true });
       }
 
       setLoadingSettings(false);
@@ -189,6 +194,22 @@ export default function SettingsPage() {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
       setSavingTelegram(false);
+    }
+  };
+
+  const handleSaveNotifPrefs = async (prefs: typeof notifPrefs) => {
+    if (!user) return;
+    setSavingNotifPrefs(true);
+    try {
+      const { error } = await supabase
+        .from("telegram_users" as any)
+        .update({ notification_prefs: prefs } as any)
+        .eq("user_id", user.id);
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingNotifPrefs(false);
     }
   };
 
@@ -444,6 +465,32 @@ export default function SettingsPage() {
                 <Label>Chat ID</Label>
                 <Input value={telegramChatId} disabled className="font-mono text-sm" />
               </div>
+              <Separator />
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notification Preferences</Label>
+                {([
+                  { key: "replies" as const, label: "Reply Alerts", desc: "Get notified when a lead replies to your emails" },
+                  { key: "meetings" as const, label: "Meeting Alerts", desc: "Get notified about meeting bookings and pipeline updates" },
+                  { key: "campaigns" as const, label: "Campaign Alerts", desc: "Get notified about campaign status changes" },
+                ]).map(({ key, label, desc }) => (
+                  <div key={key} className="flex items-center justify-between rounded-md border p-3">
+                    <div>
+                      <p className="text-sm font-medium">{label}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                    <Switch
+                      checked={notifPrefs[key]}
+                      onCheckedChange={(checked) => {
+                        const updated = { ...notifPrefs, [key]: checked };
+                        setNotifPrefs(updated);
+                        handleSaveNotifPrefs(updated);
+                      }}
+                    />
+                  </div>
+                ))}
+                {savingNotifPrefs && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving…</p>}
+              </div>
+              <Separator />
               <Button variant="destructive" size="sm" onClick={handleUnlinkTelegram} disabled={unlinkingTelegram}>
                 {unlinkingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Unlink className="h-4 w-4 mr-2" />}
                 Unlink Telegram
