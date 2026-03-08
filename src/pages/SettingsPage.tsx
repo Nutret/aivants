@@ -70,6 +70,8 @@ export default function SettingsPage() {
         setTelegramLinked(true);
         setTelegramChatId(String((tgData as any).telegram_chat_id || ""));
         setTelegramUsername((tgData as any).telegram_username || null);
+        const prefs = (tgData as any).notification_prefs;
+        if (prefs) setNotifPrefs({ replies: prefs.replies ?? true, meetings: prefs.meetings ?? true, campaigns: prefs.campaigns ?? true });
       }
 
       setLoadingSettings(false);
