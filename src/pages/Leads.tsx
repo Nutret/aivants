@@ -655,7 +655,21 @@ export default function Leads() {
                 <DetailRow label="Status" value={detailLead.status} />
                 {detailLead.notes && <DetailRow label="Notes" value={detailLead.notes} />}
 
-                <div className="pt-4 flex gap-2">
+                <div className="pt-4 flex flex-wrap gap-2">
+                  {(detailLead.website || detailLead.url) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResearch(detailLead)}
+                      disabled={researching === detailLead.id}
+                    >
+                      {researching === detailLead.id ? (
+                        <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Researching…</>
+                      ) : (
+                        <><Brain className="h-3.5 w-3.5 mr-1" /> AI Research</>
+                      )}
+                    </Button>
+                  )}
                   {detailLead.email && !detailLead.email.includes("placeholder") && (
                     <Button size="sm" variant="default" onClick={() => { setDetailLead(null); openEmailDialog(detailLead); }}>
                       <Send className="h-3.5 w-3.5 mr-1" /> Send Email
@@ -668,6 +682,55 @@ export default function Leads() {
                     <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
                   </Button>
                 </div>
+
+                {/* AI Intelligence Panel */}
+                {loadingIntel && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-3">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Loading intelligence…
+                  </div>
+                )}
+                {intelligence && (
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <Brain className="h-4 w-4 text-primary" />
+                      AI Company Intelligence
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Researched {new Date(intelligence.researched_at).toLocaleDateString()}
+                    </div>
+
+                    {intelligence.ai_opening_line && (
+                      <div className="rounded-lg border bg-primary/5 p-3 space-y-1">
+                        <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                          <MessageSquare className="h-3 w-3" /> AI Opening Line
+                        </div>
+                        <p className="text-sm italic">"{intelligence.ai_opening_line}"</p>
+                      </div>
+                    )}
+
+                    {intelligence.website_summary && (
+                      <IntelSection icon={Briefcase} label="Summary" value={intelligence.website_summary} />
+                    )}
+                    {intelligence.services && (
+                      <IntelSection icon={Target} label="Services" value={intelligence.services} />
+                    )}
+                    {intelligence.growth_signals && intelligence.growth_signals !== "No clear signals" && (
+                      <IntelSection icon={TrendingUp} label="Growth Signals" value={intelligence.growth_signals} />
+                    )}
+                    {intelligence.hiring_signals && intelligence.hiring_signals !== "No hiring signals" && (
+                      <IntelSection icon={Briefcase} label="Hiring Signals" value={intelligence.hiring_signals} />
+                    )}
+                    {intelligence.marketing_activity && (
+                      <IntelSection icon={Sparkles} label="Marketing Activity" value={intelligence.marketing_activity} />
+                    )}
+                    {intelligence.industry_focus && (
+                      <IntelSection icon={Target} label="Industry Focus" value={intelligence.industry_focus} />
+                    )}
+                    {intelligence.outreach_angle && (
+                      <IntelSection icon={Send} label="Outreach Angle" value={intelligence.outreach_angle} />
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}
