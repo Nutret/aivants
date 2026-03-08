@@ -273,6 +273,9 @@ export default function Leads() {
     toast({ title: `${leadsToExport.length} leads exported` });
   };
 
+  const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
