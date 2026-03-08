@@ -207,7 +207,71 @@ export default function Leads() {
     fetchLeads();
   };
 
-  const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === paginated.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(paginated.map((l) => l.id)));
+    }
+  };
+
+  const selectAllFiltered = () => setSelected(new Set(filtered.map((l) => l.id)));
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `${ids.length} leads deleted` });
+    setSelected(new Set());
+    setBulkDeleteOpen(false);
+    fetchLeads();
+  };
+
+  const handleBulkStatus = async (newStatus: string) => {
+    if (selected.size === 0) return;
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("leads")
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .in("id", ids);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `${ids.length} leads updated to ${newStatus}` });
+    setSelected(new Set());
+    fetchLeads();
+  };
+
+  const handleExport = () => {
+    const leadsToExport = selected.size > 0
+      ? filtered.filter((l) => selected.has(l.id))
+      : filtered;
+
+    const headers = ["First Name","Last Name","Email","Phone","Company","Title","Status","Rating","Reviews","Address","Website","URL","LinkedIn","Query","Industry","Source"];
+    const rows = leadsToExport.map((l) => [
+      l.first_name, l.last_name || "", l.email, l.phone || "", l.company_name || "",
+      l.title || "", l.status, l.rating?.toString() || "", l.reviews?.toString() || "",
+      l.address || "", l.website || "", l.url || "", l.linkedin || "",
+      l.query || "", l.industry || "", l.source || "",
+    ].map((v) => `"${v.replace(/"/g, '""')}"`).join(","));
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `${leadsToExport.length} leads exported` });
+  };
 
   return (
     <div className="space-y-6">
