@@ -135,6 +135,7 @@ export function AppSidebar() {
         {renderGroup("Clients & Projects", clientItems)}
         {renderGroup("Outreach", outreachItems)}
         {renderGroup("Insights & Revenue", insightItems)}
+        {renderGroup("AI", aiItems)}
       </SidebarContent>
 
       <SidebarFooter>
