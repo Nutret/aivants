@@ -1,44 +1,120 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Plus, Edit, Copy, Trash2, Variable } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
+interface Template {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  category: string | null;
+  created_at: string;
+}
 
 const variables = ["{first_name}", "{last_name}", "{company_name}", "{industry}", "{location}"];
 
-const mockTemplates = [
-  {
-    id: "1",
-    name: "Cold Outreach - General",
-    subject: "Quick question about {company_name}",
-    body: `Hi {first_name},\n\nI came across {company_name} and noticed your work in {industry}.\n\nWe help companies automate lead generation and increase inbound client acquisition.\n\nWould you be open to a quick conversation this week?\n\nBest regards`,
-  },
-  {
-    id: "2",
-    name: "Follow Up",
-    subject: "Following up - {company_name}",
-    body: `Hi {first_name},\n\nI wanted to follow up on my previous email about how we can help {company_name} grow.\n\nOur clients in {industry} typically see a 3x increase in qualified leads within 60 days.\n\nWould a 15-minute call work for you?`,
-  },
-];
-
 export default function Templates() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
+  const [editing, setEditing] = useState<Template | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editSubject, setEditSubject] = useState("");
   const [editBody, setEditBody] = useState("");
 
-  const insertVariable = (v: string) => {
-    setEditBody((prev) => prev + v);
+  const fetchTemplates = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("email_templates")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else setTemplates(data || []);
+    setLoading(false);
   };
 
+  useEffect(() => { fetchTemplates(); }, [user]);
+
+  const openCreate = () => {
+    setEditing(null);
+    setEditName("");
+    setEditSubject("");
+    setEditBody("");
+    setShowEditor(true);
+  };
+
+  const openEdit = (t: Template) => {
+    setEditing(t);
+    setEditName(t.name);
+    setEditSubject(t.subject);
+    setEditBody(t.body);
+    setShowEditor(true);
+  };
+
+  const handleSave = async () => {
+    if (!user || !editName.trim() || !editSubject.trim() || !editBody.trim()) return;
+
+    if (editing) {
+      const { error } = await supabase
+        .from("email_templates")
+        .update({ name: editName, subject: editSubject, body: editBody, updated_at: new Date().toISOString() })
+        .eq("id", editing.id);
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      toast({ title: "Template updated" });
+    } else {
+      const { error } = await supabase
+        .from("email_templates")
+        .insert({ user_id: user.id, name: editName, subject: editSubject, body: editBody });
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      toast({ title: "Template created" });
+    }
+
+    setShowEditor(false);
+    fetchTemplates();
+  };
+
+  const handleDuplicate = async (t: Template) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("email_templates")
+      .insert({ user_id: user.id, name: `${t.name} (Copy)`, subject: t.subject, body: t.body });
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Template duplicated" });
+    fetchTemplates();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("email_templates").delete().eq("id", deleteId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Template deleted" });
+    setDeleteId(null);
+    fetchTemplates();
+  };
+
+  const insertVariable = (v: string) => setEditBody((prev) => prev + v);
+
   const previewBody = editBody
-    .replace("{first_name}", "John")
-    .replace("{last_name}", "Smith")
-    .replace("{company_name}", "Alpha Realty")
-    .replace("{industry}", "Real Estate")
-    .replace("{location}", "New York");
+    .replace(/{first_name}/g, "John")
+    .replace(/{last_name}/g, "Smith")
+    .replace(/{company_name}/g, "Alpha Realty")
+    .replace(/{industry}/g, "Real Estate")
+    .replace(/{location}/g, "New York");
 
   return (
     <div className="space-y-6">
@@ -47,7 +123,7 @@ export default function Templates() {
           <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
           <p className="text-muted-foreground">Create reusable email templates with variables</p>
         </div>
-        <Button onClick={() => setShowEditor(!showEditor)}>
+        <Button onClick={openCreate}>
           <Plus className="h-4 w-4 mr-2" />
           New Template
         </Button>
@@ -56,20 +132,12 @@ export default function Templates() {
       {showEditor && (
         <Card>
           <CardHeader>
-            <CardTitle>Template Editor</CardTitle>
+            <CardTitle>{editing ? "Edit Template" : "New Template"}</CardTitle>
             <CardDescription>Use variables like {"{first_name}"} to personalize emails</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input
-              placeholder="Template name"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
-            <Input
-              placeholder="Email subject"
-              value={editSubject}
-              onChange={(e) => setEditSubject(e.target.value)}
-            />
+            <Input placeholder="Template name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <Input placeholder="Email subject" value={editSubject} onChange={(e) => setEditSubject(e.target.value)} />
             <div className="flex flex-wrap gap-2">
               {variables.map((v) => (
                 <Button key={v} variant="outline" size="sm" onClick={() => insertVariable(v)}>
@@ -96,37 +164,68 @@ export default function Templates() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button>Save Template</Button>
+              <Button onClick={handleSave} disabled={!editName.trim() || !editSubject.trim() || !editBody.trim()}>
+                {editing ? "Save Changes" : "Save Template"}
+              </Button>
               <Button variant="outline" onClick={() => setShowEditor(false)}>Cancel</Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {mockTemplates.map((template) => (
-          <Card key={template.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{template.name}</h3>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    Subject: <span className="font-mono">{template.subject}</span>
+      {loading ? (
+        <p className="text-muted-foreground">Loading templates…</p>
+      ) : templates.length === 0 && !showEditor ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground">No templates yet. Create your first email template to get started.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {templates.map((template) => (
+            <Card key={template.id}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{template.name}</h3>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Subject: <span className="font-mono">{template.subject}</span>
+                    </div>
+                    <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground line-clamp-3">
+                      {template.body}
+                    </div>
                   </div>
-                  <div className="mt-3 text-sm whitespace-pre-wrap text-muted-foreground line-clamp-3">
-                    {template.body}
+                  <div className="flex gap-1 ml-4">
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(template)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDuplicate(template)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => setDeleteId(template.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-1 ml-4">
-                  <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete template?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete this email template.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
