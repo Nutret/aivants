@@ -943,3 +943,14 @@ function LinkRow({ label, url }: { label: string; url: string }) {
     </div>
   );
 }
+
+function IntelSection({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+        <Icon className="h-3 w-3" /> {label}
+      </div>
+      <p className="text-sm">{value}</p>
+    </div>
+  );
+}
