@@ -13,6 +13,8 @@ import Campaigns from "./pages/Campaigns";
 import Templates from "./pages/Templates";
 import Pipeline from "./pages/Pipeline";
 import Analytics from "./pages/Analytics";
+import Scripts from "./pages/Scripts";
+import ContentLibrary from "./pages/ContentLibrary";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
