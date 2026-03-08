@@ -362,6 +362,44 @@ export default function Leads() {
 
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
+  // AI Company Research
+  const handleResearch = async (lead: Lead) => {
+    if (!lead.website && !lead.url) {
+      toast({ title: "No website", description: "This lead has no website or URL to research.", variant: "destructive" });
+      return;
+    }
+    setResearching(lead.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-research-company", {
+        body: { lead_id: lead.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setIntelligence(data as CompanyIntelligence);
+      toast({ title: "Research complete!", description: `Intelligence gathered for ${lead.company_name || lead.first_name}` });
+    } catch (err: any) {
+      toast({ title: "Research failed", description: err.message, variant: "destructive" });
+    } finally {
+      setResearching(null);
+    }
+  };
+
+  // Load intelligence when detail sheet opens
+  const openDetail = async (lead: Lead) => {
+    setDetailLead(lead);
+    setIntelligence(null);
+    setLoadingIntel(true);
+    const { data } = await supabase
+      .from("company_intelligence")
+      .select("*")
+      .eq("lead_id", lead.id)
+      .order("researched_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) setIntelligence(data as CompanyIntelligence);
+    setLoadingIntel(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
