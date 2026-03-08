@@ -71,6 +71,11 @@ const insightItems = [
   { title: "Orchestrator", url: "/orchestrator", icon: Radio },
 ];
 
+const aiItems = [
+  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+  { title: "Knowledge Base", url: "/knowledge-base", icon: BookOpen },
+];
+
 const bottomItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ];
