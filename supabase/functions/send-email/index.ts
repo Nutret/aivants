@@ -78,6 +78,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Build email payload
+    const emailPayload: Record<string, any> = {
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: senderEmail, name: "Aivants" },
+      subject,
+      content: [{ type: "text/html", value: body.replace(/\n/g, "<br>") }],
+    };
+
+    // Add document link in email body if attachment provided
+    if (attachment_url) {
+      const docLink = `<br><br><hr><p><strong>📎 Attached Document:</strong> <a href="${attachment_url}">${attachment_name || "Download Document"}</a></p>`;
+      emailPayload.content[0].value += docLink;
+    }
+
     // Send via SendGrid
     const sgResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
@@ -85,12 +99,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${SENDGRID_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: to }] }],
-        from: { email: senderEmail },
-        subject,
-        content: [{ type: "text/html", value: body }],
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     if (!sgResponse.ok) {
