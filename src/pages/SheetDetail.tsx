@@ -194,7 +194,7 @@ export default function SheetDetail() {
                   <TableCell>{lead.company_name || "—"}</TableCell>
                   <TableCell>
                     {lead.rating ? (
-                      <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /> {lead.rating}</span>
+                      <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 text-warning fill-warning" /> {lead.rating}</span>
                     ) : "—"}
                   </TableCell>
                   <TableCell>

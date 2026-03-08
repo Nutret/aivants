@@ -43,6 +43,7 @@ interface CategoryInfo {
   industry_type: string;
   description: string;
   color: string;
+  created_at: string;
 }
 
 export default function CategoryDetail() {
