@@ -333,9 +333,42 @@ export default function Leads() {
             </div>
           ) : (
             <>
+              {selected.size > 0 && (
+                <div className="flex items-center gap-3 border-b px-4 py-2 bg-muted/50">
+                  <span className="text-sm font-medium">{selected.size} selected</span>
+                  {selected.size < filtered.length && (
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={selectAllFiltered}>
+                      Select all {filtered.length}
+                    </Button>
+                  )}
+                  <div className="ml-auto flex gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">Change Status</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("new")}>New</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("contacted")}>Contacted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("interested")}>Interested</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("meeting")}>Meeting</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
+                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
+                  </div>
+                </div>
+              )}
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={paginated.length > 0 && paginated.every((l) => selected.has(l.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Company</TableHead>
                     <TableHead className="hidden md:table-cell">Phone</TableHead>
@@ -349,9 +382,15 @@ export default function Leads() {
                   {paginated.map((lead) => (
                     <TableRow
                       key={lead.id}
-                      className="cursor-pointer hover:bg-muted/50"
+                      className={`cursor-pointer hover:bg-muted/50 ${selected.has(lead.id) ? "bg-muted/30" : ""}`}
                       onClick={() => setDetailLead(lead)}
                     >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selected.has(lead.id)}
+                          onCheckedChange={() => toggleSelect(lead.id)}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{lead.first_name} {lead.last_name || ""}</div>
                         {lead.email && !lead.email.includes("placeholder") && (
