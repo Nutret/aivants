@@ -257,6 +257,64 @@ Deno.serve(async (req) => {
       .eq("lead_id", lead.id)
       .eq("status", "active");
 
+    // Send email alert for high-priority replies
+    if (priority === "high") {
+      try {
+        // Get user's email from auth
+        const { data: userData } = await serviceClient.auth.admin.getUserById(lead.user_id);
+        const userEmail = userData?.user?.email;
+
+        if (userEmail) {
+          const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+          // Get user's configured from_email
+          const { data: settings } = await serviceClient
+            .from("user_settings")
+            .select("from_email")
+            .eq("user_id", lead.user_id)
+            .maybeSingle();
+          const senderEmail = settings?.from_email || "noreply@example.com";
+
+          if (SENDGRID_API_KEY) {
+            await fetch("https://api.sendgrid.com/v3/mail/send", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${SENDGRID_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                personalizations: [{ to: [{ email: userEmail }] }],
+                from: { email: senderEmail, name: "Aivants Alert" },
+                subject: `🔥 High-Priority Reply: ${classification.replace(/_/g, " ")} from ${fromEmail}`,
+                content: [{
+                  type: "text/html",
+                  value: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                      <h2 style="color: #1a1a1a;">🔔 High-Priority Reply Detected</h2>
+                      <div style="background: #f4f4f5; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                        <p style="margin: 4px 0;"><strong>From:</strong> ${fromEmail}</p>
+                        <p style="margin: 4px 0;"><strong>Classification:</strong> ${classification.replace(/_/g, " ")}</p>
+                        <p style="margin: 4px 0;"><strong>Sentiment:</strong> ${sentiment}</p>
+                        <p style="margin: 4px 0;"><strong>Suggested Action:</strong> ${suggestedAction}</p>
+                      </div>
+                      <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                        <p style="font-weight: bold; margin-bottom: 8px;">Reply Preview:</p>
+                        <p style="color: #555; white-space: pre-wrap;">${replyBody.substring(0, 500)}${replyBody.length > 500 ? "..." : ""}</p>
+                      </div>
+                      <p style="color: #888; font-size: 12px;">This is an automated alert from Aivants. Log in to take action.</p>
+                    </div>
+                  `,
+                }],
+              }),
+            });
+            console.log(`Alert email sent to ${userEmail} for high-priority reply`);
+          }
+        }
+      } catch (alertErr) {
+        console.error("Failed to send alert email:", alertErr);
+        // Don't fail the webhook response for alert failures
+      }
+    }
+
     return new Response(
       JSON.stringify({
         status: "processed",

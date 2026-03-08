@@ -193,6 +193,72 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send email alert for high-priority replies
+    if (priority === "high") {
+      try {
+        const { data: userData } = await serviceClient.auth.admin.getUserById(user.id);
+        const userEmail = userData?.user?.email;
+
+        if (userEmail) {
+          const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+          const { data: settings } = await serviceClient
+            .from("user_settings")
+            .select("from_email")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const senderEmail = settings?.from_email || "noreply@example.com";
+
+          // Get lead info for the alert
+          const { data: emailLogData } = await serviceClient
+            .from("email_logs")
+            .select("lead_id, leads(first_name, last_name, email, company_name)")
+            .eq("id", email_log_id)
+            .single();
+          const leadInfo = (emailLogData as any)?.leads;
+          const leadName = leadInfo ? `${leadInfo.first_name} ${leadInfo.last_name || ""}`.trim() : "Unknown";
+          const leadEmail = leadInfo?.email || "unknown";
+
+          if (SENDGRID_API_KEY) {
+            await fetch("https://api.sendgrid.com/v3/mail/send", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${SENDGRID_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                personalizations: [{ to: [{ email: userEmail }] }],
+                from: { email: senderEmail, name: "Aivants Alert" },
+                subject: `🔥 High-Priority Reply: ${classification.replace(/_/g, " ")} from ${leadName}`,
+                content: [{
+                  type: "text/html",
+                  value: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                      <h2 style="color: #1a1a1a;">🔔 High-Priority Reply Detected</h2>
+                      <div style="background: #f4f4f5; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                        <p style="margin: 4px 0;"><strong>Lead:</strong> ${leadName} (${leadEmail})</p>
+                        <p style="margin: 4px 0;"><strong>Company:</strong> ${leadInfo?.company_name || "N/A"}</p>
+                        <p style="margin: 4px 0;"><strong>Classification:</strong> ${classification.replace(/_/g, " ")}</p>
+                        <p style="margin: 4px 0;"><strong>Sentiment:</strong> ${sentiment}</p>
+                        <p style="margin: 4px 0;"><strong>Suggested Action:</strong> ${suggestedAction}</p>
+                      </div>
+                      <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                        <p style="font-weight: bold; margin-bottom: 8px;">Reply Preview:</p>
+                        <p style="color: #555; white-space: pre-wrap;">${reply_body.substring(0, 500)}${reply_body.length > 500 ? "..." : ""}</p>
+                      </div>
+                      <p style="color: #888; font-size: 12px;">This is an automated alert from Aivants. Log in to take action.</p>
+                    </div>
+                  `,
+                }],
+              }),
+            });
+            console.log(`Alert email sent to ${userEmail} for high-priority reply from ${leadName}`);
+          }
+        }
+      } catch (alertErr) {
+        console.error("Failed to send alert email:", alertErr);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
