@@ -343,16 +343,30 @@ ${page_context ? `\nCurrent page context: ${page_context}` : ""}
 Today's date: ${new Date().toISOString().split("T")[0]}`;
 
     // Determine API endpoint and headers based on provider
+    // Note: For Lovable gateway, always use LOVABLE_API_KEY regardless of user settings
+    // Only switch to external APIs if explicitly configured with matching API URL
     let apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
     let apiKey = LOVABLE_API_KEY;
     
-    if (provider !== "lovable" && aiSettings?.api_key) {
-      apiKey = aiSettings.api_key;
-      switch (provider) {
-        case "openai": apiUrl = "https://api.openai.com/v1/chat/completions"; break;
-        case "anthropic": apiUrl = "https://api.anthropic.com/v1/messages"; break;
-        case "groq": apiUrl = "https://api.groq.com/openai/v1/chat/completions"; break;
-        default: apiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions"; break;
+    // Only use custom API key for truly external providers with their own endpoints
+    if (aiSettings?.api_key && aiSettings?.provider) {
+      switch (aiSettings.provider) {
+        case "openai": 
+          apiUrl = "https://api.openai.com/v1/chat/completions";
+          apiKey = aiSettings.api_key;
+          break;
+        case "anthropic": 
+          apiUrl = "https://api.anthropic.com/v1/messages";
+          apiKey = aiSettings.api_key;
+          break;
+        case "groq": 
+          apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+          apiKey = aiSettings.api_key;
+          break;
+        // For "lovable", "gemini", or any other value, use Lovable gateway with LOVABLE_API_KEY
+        default:
+          // Keep default Lovable gateway
+          break;
       }
     }
 
@@ -361,6 +375,7 @@ Today's date: ${new Date().toISOString().split("T")[0]}`;
       { role: "system", content: systemPrompt },
       ...messages.map((m: any) => ({ role: m.role, content: m.content })),
     ];
+
 
     const firstResponse = await fetch(apiUrl, {
       method: "POST",
