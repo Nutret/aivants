@@ -339,6 +339,12 @@ export default function ImportLeads() {
         setProgress(20 + Math.round(((i + batchSize) / newLeads.length) * 80));
       }
 
+      // Update sheet lead_count
+      if (sheetId && imported > 0) {
+        const { data: currentSheet } = await supabase.from("lead_sheets").select("lead_count").eq("id", sheetId).single();
+        await supabase.from("lead_sheets").update({ lead_count: (currentSheet?.lead_count || 0) + imported, updated_at: new Date().toISOString() }).eq("id", sheetId);
+      }
+
       setProgress(100);
       setResult({ imported, skipped, errors });
       toast({ title: "Import complete", description: `${imported} leads imported successfully.` });
