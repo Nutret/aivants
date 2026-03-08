@@ -12,27 +12,39 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // This is a PUBLIC webhook — no user auth required.
-    // Validate via a shared secret header to prevent abuse.
-    const webhookSecret = Deno.env.get("WEBHOOK_SECRET");
-    const providedSecret = req.headers.get("x-webhook-secret");
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
-    // If WEBHOOK_SECRET is configured, enforce it. Otherwise accept all (for SendGrid inbound parse).
-    if (webhookSecret && providedSecret !== webhookSecret) {
-      // Also accept if no secret header but content-type is multipart (SendGrid inbound parse)
-      const contentType = req.headers.get("content-type") || "";
-      if (!contentType.includes("multipart/form-data") && !contentType.includes("application/x-www-form-urlencoded")) {
+    // Validate webhook secret: check env var first, then per-user DB secrets
+    const envSecret = Deno.env.get("WEBHOOK_SECRET");
+    const providedSecret = req.headers.get("x-webhook-secret");
+    const contentType = req.headers.get("content-type") || "";
+    const isFormData = contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded");
+
+    if (envSecret && providedSecret !== envSecret && !isFormData) {
+      return new Response(JSON.stringify({ error: "Invalid webhook secret" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // If no env secret, check if any user has a DB-stored webhook secret that matches
+    if (!envSecret && providedSecret) {
+      const { data: matchingSettings } = await serviceClient
+        .from("user_settings")
+        .select("user_id")
+        .eq("webhook_secret", providedSecret)
+        .limit(1);
+      // Secret provided but doesn't match any user — reject
+      if (!matchingSettings || matchingSettings.length === 0) {
         return new Response(JSON.stringify({ error: "Invalid webhook secret" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
-
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
     let fromEmail = "";
     let toEmail = "";

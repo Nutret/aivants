@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Save, Mail, CheckCircle2 } from "lucide-react";
+import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -19,7 +19,9 @@ export default function SettingsPage() {
   // Email config state
   const [fromEmail, setFromEmail] = useState("");
   const [emailProvider, setEmailProvider] = useState("sendgrid");
+  const [webhookSecret, setWebhookSecret] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savingWebhook, setSavingWebhook] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
 
@@ -44,6 +46,7 @@ export default function SettingsPage() {
       if (!error && data) {
         setFromEmail(data.from_email || "");
         setEmailProvider(data.email_provider || "sendgrid");
+        setWebhookSecret((data as any).webhook_secret || "");
         setSettingsId(data.id);
       }
       setLoadingSettings(false);
@@ -103,6 +106,44 @@ export default function SettingsPage() {
     } finally {
       setSending(false);
     }
+  };
+
+  const generateSecret = () => {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+  };
+
+  const handleSaveWebhookSecret = async () => {
+    if (!user) return;
+    setSavingWebhook(true);
+    try {
+      if (settingsId) {
+        const { error } = await supabase
+          .from("user_settings")
+          .update({ webhook_secret: webhookSecret || null, updated_at: new Date().toISOString() } as any)
+          .eq("id", settingsId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("user_settings")
+          .insert({ user_id: user.id, webhook_secret: webhookSecret || null } as any)
+          .select()
+          .single();
+        if (error) throw error;
+        setSettingsId(data.id);
+      }
+      toast({ title: "Saved!", description: "Webhook secret updated." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingWebhook(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied to clipboard" });
   };
 
   return (
@@ -238,6 +279,81 @@ export default function SettingsPage() {
           <Button onClick={handleSendTest} disabled={sending || !fromEmail}>
             {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
             {sending ? "Sending…" : "Send Test Email"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Webhook Security Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Webhook Security
+          </CardTitle>
+          <CardDescription>
+            Secure your inbound reply webhook with a secret key. External services must include this as an <code className="text-xs bg-muted px-1 rounded">x-webhook-secret</code> header.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Webhook Secret</Label>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={webhookSecret}
+                onChange={(e) => setWebhookSecret(e.target.value)}
+                placeholder="Enter or generate a webhook secret"
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setWebhookSecret(generateSecret())}
+                title="Generate random secret"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              {webhookSecret && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => copyToClipboard(webhookSecret)}
+                  title="Copy to clipboard"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Leave empty to accept all incoming webhooks (less secure). Generate a strong secret and add it to your email provider's webhook configuration.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Webhook URL</Label>
+            <div className="flex gap-2">
+              <Input
+                value={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/inbound-reply-webhook`}
+                disabled
+                className="font-mono text-xs"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/inbound-reply-webhook`)}
+                title="Copy URL"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use this URL in SendGrid Inbound Parse or other webhook providers.
+            </p>
+          </div>
+
+          <Button onClick={handleSaveWebhookSecret} disabled={savingWebhook}>
+            {savingWebhook ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {savingWebhook ? "Saving…" : "Save Webhook Secret"}
           </Button>
         </CardContent>
       </Card>
