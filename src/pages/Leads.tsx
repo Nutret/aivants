@@ -21,7 +21,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download, Send, Loader2, Mail } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -100,6 +100,10 @@ export default function Leads() {
   const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailTarget, setEmailTarget] = useState<Lead | null>(null);
+  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
+  const [sendingEmail, setSendingEmail] = useState(false);
   const perPage = 10;
 
   const fetchLeads = async () => {
@@ -291,6 +295,40 @@ export default function Leads() {
     toast({ title: `${leadsToExport.length} leads exported` });
   };
 
+  const openEmailDialog = (lead: Lead) => {
+    setEmailTarget(lead);
+    setEmailForm({
+      subject: `Hi ${lead.first_name}, reaching out from our team`,
+      body: `<p>Hi ${lead.first_name},</p><p>I wanted to reach out regarding your business${lead.company_name ? ` at ${lead.company_name}` : ""}.</p><p>Would you be available for a quick call this week?</p><p>Best regards</p>`,
+      from_email: "",
+    });
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailTarget || !emailForm.subject || !emailForm.body) return;
+    setSendingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: {
+          to: emailTarget.email,
+          subject: emailForm.subject,
+          body: emailForm.body,
+          from_email: emailForm.from_email || undefined,
+          lead_id: emailTarget.id,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error + (data.details ? `: ${data.details}` : ""));
+      toast({ title: "Email sent!", description: `Email delivered to ${emailTarget.email}` });
+      setEmailDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Failed to send", description: err.message, variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   return (
@@ -470,6 +508,11 @@ export default function Leads() {
                       <TableCell>{getStatusBadge(lead.status)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          {lead.email && !lead.email.includes("placeholder") && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEmailDialog(lead)} title="Send Email">
+                              <Mail className="h-3.5 w-3.5 text-primary" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(lead)}>
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -544,7 +587,12 @@ export default function Leads() {
                 {detailLead.notes && <DetailRow label="Notes" value={detailLead.notes} />}
 
                 <div className="pt-4 flex gap-2">
-                  <Button size="sm" onClick={() => { setDetailLead(null); openEdit(detailLead); }}>
+                  {detailLead.email && !detailLead.email.includes("placeholder") && (
+                    <Button size="sm" variant="default" onClick={() => { setDetailLead(null); openEmailDialog(detailLead); }}>
+                      <Send className="h-3.5 w-3.5 mr-1" /> Send Email
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" onClick={() => { setDetailLead(null); openEdit(detailLead); }}>
                     <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => { setDetailLead(null); setDeleteId(detailLead.id); }}>
@@ -689,6 +737,53 @@ export default function Leads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Email Compose Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Send Email to {emailTarget?.first_name} {emailTarget?.last_name || ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="text-sm text-muted-foreground">
+              To: <span className="font-medium text-foreground">{emailTarget?.email}</span>
+            </div>
+            <div className="space-y-2">
+              <Label>From Email (optional)</Label>
+              <Input
+                type="email"
+                value={emailForm.from_email}
+                onChange={(e) => setEmailForm({ ...emailForm, from_email: e.target.value })}
+                placeholder="Must be a verified SendGrid sender"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Subject *</Label>
+              <Input
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Body (HTML) *</Label>
+              <Textarea
+                value={emailForm.body}
+                onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
+                rows={6}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendEmail} disabled={sendingEmail || !emailForm.subject || !emailForm.body}>
+              {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              {sendingEmail ? "Sending…" : "Send Email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
