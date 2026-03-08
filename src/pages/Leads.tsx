@@ -21,7 +21,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download, Send, Loader2, Mail } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
