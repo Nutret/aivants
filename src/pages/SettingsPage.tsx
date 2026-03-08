@@ -415,6 +415,63 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Telegram Bot Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            Telegram Bot
+          </CardTitle>
+          <CardDescription>
+            Link your Telegram account to receive notifications and control Aivants from Telegram.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {telegramLinked ? (
+            <>
+              <div className="flex items-center gap-2 text-sm bg-success/10 text-success p-3 rounded-md">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Telegram is <b>linked</b>!</span>
+                {telegramUsername && <span className="text-muted-foreground">(@{telegramUsername})</span>}
+              </div>
+              <div>
+                <Label>Chat ID</Label>
+                <Input value={telegramChatId} disabled className="font-mono text-sm" />
+              </div>
+              <Button variant="destructive" size="sm" onClick={handleUnlinkTelegram} disabled={unlinkingTelegram}>
+                {unlinkingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Unlink className="h-4 w-4 mr-2" />}
+                Unlink Telegram
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  <b>How to link:</b><br/>
+                  1. Open Telegram and search for your Aivants bot<br/>
+                  2. Send <code>/start</code> to the bot<br/>
+                  3. Copy the Chat ID the bot gives you<br/>
+                  4. Paste it below and click "Link Account"
+                </p>
+                <div>
+                  <Label>Telegram Chat ID</Label>
+                  <Input
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    placeholder="e.g. 123456789"
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+              <Button onClick={handleLinkTelegram} disabled={savingTelegram || !telegramChatId.trim()}>
+                {savingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
+                {savingTelegram ? "Linking…" : "Link Account"}
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
