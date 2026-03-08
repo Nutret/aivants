@@ -51,6 +51,7 @@ const App = () => (
               <Route path="/templates" element={<Templates />} />
               <Route path="/scripts" element={<Scripts />} />
               <Route path="/content" element={<ContentLibrary />} />
+              <Route path="/sequences" element={<Sequences />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<SettingsPage />} />
