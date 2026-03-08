@@ -185,7 +185,7 @@ export default function SettingsPage() {
               </div>
 
               {fromEmail && settingsId && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
+                <div className="flex items-center gap-2 text-sm text-accent-foreground bg-accent/10 p-2 rounded-md">
                   <CheckCircle2 className="h-4 w-4" />
                   Currently saved: <span className="font-mono font-medium">{fromEmail}</span>
                 </div>
