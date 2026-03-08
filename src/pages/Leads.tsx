@@ -119,6 +119,9 @@ export default function Leads() {
   const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
   const [sendingEmail, setSendingEmail] = useState(false);
   const [savedFromEmail, setSavedFromEmail] = useState("");
+  const [researching, setResearching] = useState<string | null>(null);
+  const [intelligence, setIntelligence] = useState<CompanyIntelligence | null>(null);
+  const [loadingIntel, setLoadingIntel] = useState(false);
   const perPage = 10;
 
   const fetchLeads = async () => {
