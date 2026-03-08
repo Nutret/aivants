@@ -234,7 +234,14 @@ export default function Orchestrator() {
           <h1 className="text-3xl font-bold tracking-tight">Orchestrator</h1>
           <p className="text-muted-foreground">Multi-channel outreach & AI deal assistant</p>
         </div>
-        <Button onClick={() => setLogActivityDialog(true)}>
+        <div className="flex items-center gap-3">
+          {realtimeCount > 0 && (
+            <Badge variant="default" className="animate-pulse gap-1">
+              <Bell className="h-3 w-3" />
+              {realtimeCount} new
+            </Badge>
+          )}
+          <Button onClick={() => setLogActivityDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Log Activity
         </Button>
       </div>
