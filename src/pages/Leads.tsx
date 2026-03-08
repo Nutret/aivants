@@ -544,7 +544,7 @@ export default function Leads() {
                     <TableRow
                       key={lead.id}
                       className={`cursor-pointer hover:bg-muted/50 ${selected.has(lead.id) ? "bg-muted/30" : ""}`}
-                      onClick={() => setDetailLead(lead)}
+                      onClick={() => openDetail(lead)}
                     >
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
