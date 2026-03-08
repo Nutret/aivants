@@ -296,12 +296,25 @@ export default function Leads() {
     toast({ title: `${leadsToExport.length} leads exported` });
   };
 
+  // Load saved from_email from user_settings
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("from_email")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data?.from_email) setSavedFromEmail(data.from_email);
+    })();
+  }, [user]);
+
   const openEmailDialog = (lead: Lead) => {
     setEmailTarget(lead);
     setEmailForm({
       subject: `Hi ${lead.first_name}, reaching out from our team`,
       body: `<p>Hi ${lead.first_name},</p><p>I wanted to reach out regarding your business${lead.company_name ? ` at ${lead.company_name}` : ""}.</p><p>Would you be available for a quick call this week?</p><p>Best regards</p>`,
-      from_email: "",
+      from_email: savedFromEmail,
     });
     setEmailDialogOpen(true);
   };
