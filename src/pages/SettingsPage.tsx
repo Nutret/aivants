@@ -166,6 +166,44 @@ export default function SettingsPage() {
     toast({ title: "Copied to clipboard" });
   };
 
+  const handleLinkTelegram = async () => {
+    if (!user || !telegramChatId.trim()) {
+      toast({ title: "Missing Chat ID", description: "Enter your Telegram Chat ID.", variant: "destructive" });
+      return;
+    }
+    setSavingTelegram(true);
+    try {
+      const { error } = await supabase.from("telegram_users" as any).insert({
+        user_id: user.id,
+        telegram_chat_id: parseInt(telegramChatId.trim()),
+      } as any);
+      if (error) throw error;
+      setTelegramLinked(true);
+      toast({ title: "Telegram Linked!", description: "Your bot will now send notifications." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingTelegram(false);
+    }
+  };
+
+  const handleUnlinkTelegram = async () => {
+    if (!user) return;
+    setUnlinkingTelegram(true);
+    try {
+      const { error } = await supabase.from("telegram_users" as any).delete().eq("user_id", user.id);
+      if (error) throw error;
+      setTelegramLinked(false);
+      setTelegramChatId("");
+      setTelegramUsername(null);
+      toast({ title: "Telegram Unlinked" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUnlinkingTelegram(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
