@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   IndianRupee, Plus, TrendingUp, TrendingDown, Wallet, Users, CreditCard,
-  BarChart3, Trash2, Edit, ArrowUpRight, ArrowDownRight, Target
+  BarChart3, Trash2, Edit, ArrowUpRight, ArrowDownRight, Target, Download
 } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import {
