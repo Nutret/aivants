@@ -282,6 +282,81 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Webhook Security Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Webhook Security
+          </CardTitle>
+          <CardDescription>
+            Secure your inbound reply webhook with a secret key. External services must include this as an <code className="text-xs bg-muted px-1 rounded">x-webhook-secret</code> header.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Webhook Secret</Label>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={webhookSecret}
+                onChange={(e) => setWebhookSecret(e.target.value)}
+                placeholder="Enter or generate a webhook secret"
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setWebhookSecret(generateSecret())}
+                title="Generate random secret"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              {webhookSecret && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => copyToClipboard(webhookSecret)}
+                  title="Copy to clipboard"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Leave empty to accept all incoming webhooks (less secure). Generate a strong secret and add it to your email provider's webhook configuration.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Webhook URL</Label>
+            <div className="flex gap-2">
+              <Input
+                value={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/inbound-reply-webhook`}
+                disabled
+                className="font-mono text-xs"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/inbound-reply-webhook`)}
+                title="Copy URL"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use this URL in SendGrid Inbound Parse or other webhook providers.
+            </p>
+          </div>
+
+          <Button onClick={handleSaveWebhookSecret} disabled={savingWebhook}>
+            {savingWebhook ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {savingWebhook ? "Saving…" : "Save Webhook Secret"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
