@@ -21,7 +21,11 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -88,9 +92,11 @@ export default function Leads() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [editing, setEditing] = useState<Lead | null>(null);
   const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const perPage = 10;
 
   const fetchLeads = async () => {
@@ -201,6 +207,72 @@ export default function Leads() {
     fetchLeads();
   };
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === paginated.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(paginated.map((l) => l.id)));
+    }
+  };
+
+  const selectAllFiltered = () => setSelected(new Set(filtered.map((l) => l.id)));
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("leads").delete().in("id", ids);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `${ids.length} leads deleted` });
+    setSelected(new Set());
+    setBulkDeleteOpen(false);
+    fetchLeads();
+  };
+
+  const handleBulkStatus = async (newStatus: string) => {
+    if (selected.size === 0) return;
+    const ids = Array.from(selected);
+    const { error } = await supabase
+      .from("leads")
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .in("id", ids);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `${ids.length} leads updated to ${newStatus}` });
+    setSelected(new Set());
+    fetchLeads();
+  };
+
+  const handleExport = () => {
+    const leadsToExport = selected.size > 0
+      ? filtered.filter((l) => selected.has(l.id))
+      : filtered;
+
+    const headers = ["First Name","Last Name","Email","Phone","Company","Title","Status","Rating","Reviews","Address","Website","URL","LinkedIn","Query","Industry","Source"];
+    const rows = leadsToExport.map((l) => [
+      l.first_name, l.last_name || "", l.email, l.phone || "", l.company_name || "",
+      l.title || "", l.status, l.rating?.toString() || "", l.reviews?.toString() || "",
+      l.address || "", l.website || "", l.url || "", l.linkedin || "",
+      l.query || "", l.industry || "", l.source || "",
+    ].map((v) => `"${v.replace(/"/g, '""')}"`).join(","));
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `${leadsToExport.length} leads exported` });
+  };
+
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   return (
@@ -210,10 +282,16 @@ export default function Leads() {
           <h1 className="text-3xl font-bold tracking-tight">Leads</h1>
           <p className="text-muted-foreground">Manage your lead database</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Lead
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            {selected.size > 0 ? `Export (${selected.size})` : "Export All"}
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Lead
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -255,9 +333,42 @@ export default function Leads() {
             </div>
           ) : (
             <>
+              {selected.size > 0 && (
+                <div className="flex items-center gap-3 border-b px-4 py-2 bg-muted/50">
+                  <span className="text-sm font-medium">{selected.size} selected</span>
+                  {selected.size < filtered.length && (
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={selectAllFiltered}>
+                      Select all {filtered.length}
+                    </Button>
+                  )}
+                  <div className="ml-auto flex gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">Change Status</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("new")}>New</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("contacted")}>Contacted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("interested")}>Interested</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleBulkStatus("meeting")}>Meeting</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
+                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
+                  </div>
+                </div>
+              )}
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={paginated.length > 0 && paginated.every((l) => selected.has(l.id))}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Company</TableHead>
                     <TableHead className="hidden md:table-cell">Phone</TableHead>
@@ -271,9 +382,15 @@ export default function Leads() {
                   {paginated.map((lead) => (
                     <TableRow
                       key={lead.id}
-                      className="cursor-pointer hover:bg-muted/50"
+                      className={`cursor-pointer hover:bg-muted/50 ${selected.has(lead.id) ? "bg-muted/30" : ""}`}
                       onClick={() => setDetailLead(lead)}
                     >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selected.has(lead.id)}
+                          onCheckedChange={() => toggleSelect(lead.id)}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{lead.first_name} {lead.last_name || ""}</div>
                         {lead.email && !lead.email.includes("placeholder") && (
@@ -501,6 +618,20 @@ export default function Leads() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {selected.size} leads?</AlertDialogTitle>
+            <AlertDialogDescription>This will permanently delete the selected leads and all associated data.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete}>Delete All</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
