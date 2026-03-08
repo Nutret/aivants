@@ -279,6 +279,9 @@ export default function Revenue() {
           <p className="text-muted-foreground">Financial overview — revenue, costs, profit & growth projections</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={exportCSV} className="gap-1" disabled={entries.length === 0}>
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
           <Button onClick={() => openCreate("payment")} className="gap-1">
             <Plus className="h-4 w-4" /> Add Payment
           </Button>
