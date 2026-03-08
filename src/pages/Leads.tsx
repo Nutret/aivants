@@ -21,7 +21,7 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download, Send, Loader2, Mail } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star, Download, Send, Loader2, Mail, Sparkles, Brain, TrendingUp, Briefcase, Target, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -52,6 +52,20 @@ interface Lead {
   industry: string | null;
   location: string | null;
   created_at: string;
+}
+
+interface CompanyIntelligence {
+  id: string;
+  lead_id: string;
+  website_summary: string;
+  services: string;
+  growth_signals: string;
+  hiring_signals: string;
+  marketing_activity: string;
+  industry_focus: string;
+  outreach_angle: string;
+  ai_opening_line: string;
+  researched_at: string;
 }
 
 const emptyForm = {
@@ -105,6 +119,9 @@ export default function Leads() {
   const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
   const [sendingEmail, setSendingEmail] = useState(false);
   const [savedFromEmail, setSavedFromEmail] = useState("");
+  const [researching, setResearching] = useState<string | null>(null);
+  const [intelligence, setIntelligence] = useState<CompanyIntelligence | null>(null);
+  const [loadingIntel, setLoadingIntel] = useState(false);
   const perPage = 10;
 
   const fetchLeads = async () => {
@@ -345,6 +362,44 @@ export default function Leads() {
 
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
+  // AI Company Research
+  const handleResearch = async (lead: Lead) => {
+    if (!lead.website && !lead.url) {
+      toast({ title: "No website", description: "This lead has no website or URL to research.", variant: "destructive" });
+      return;
+    }
+    setResearching(lead.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-research-company", {
+        body: { lead_id: lead.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setIntelligence(data as CompanyIntelligence);
+      toast({ title: "Research complete!", description: `Intelligence gathered for ${lead.company_name || lead.first_name}` });
+    } catch (err: any) {
+      toast({ title: "Research failed", description: err.message, variant: "destructive" });
+    } finally {
+      setResearching(null);
+    }
+  };
+
+  // Load intelligence when detail sheet opens
+  const openDetail = async (lead: Lead) => {
+    setDetailLead(lead);
+    setIntelligence(null);
+    setLoadingIntel(true);
+    const { data } = await supabase
+      .from("company_intelligence")
+      .select("*")
+      .eq("lead_id", lead.id)
+      .order("researched_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) setIntelligence(data as CompanyIntelligence);
+    setLoadingIntel(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -489,7 +544,7 @@ export default function Leads() {
                     <TableRow
                       key={lead.id}
                       className={`cursor-pointer hover:bg-muted/50 ${selected.has(lead.id) ? "bg-muted/30" : ""}`}
-                      onClick={() => setDetailLead(lead)}
+                      onClick={() => openDetail(lead)}
                     >
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <Checkbox
@@ -522,6 +577,18 @@ export default function Leads() {
                       <TableCell>{getStatusBadge(lead.status)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          {(lead.website || lead.url) && (
+                            <Button
+                              variant="ghost" size="icon" className="h-8 w-8"
+                              onClick={() => handleResearch(lead)}
+                              disabled={researching === lead.id}
+                              title="AI Research"
+                            >
+                              {researching === lead.id
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Brain className="h-3.5 w-3.5 text-accent-foreground" />}
+                            </Button>
+                          )}
                           {lead.email && !lead.email.includes("placeholder") && (
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEmailDialog(lead)} title="Send Email">
                               <Mail className="h-3.5 w-3.5 text-primary" />
@@ -600,7 +667,21 @@ export default function Leads() {
                 <DetailRow label="Status" value={detailLead.status} />
                 {detailLead.notes && <DetailRow label="Notes" value={detailLead.notes} />}
 
-                <div className="pt-4 flex gap-2">
+                <div className="pt-4 flex flex-wrap gap-2">
+                  {(detailLead.website || detailLead.url) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResearch(detailLead)}
+                      disabled={researching === detailLead.id}
+                    >
+                      {researching === detailLead.id ? (
+                        <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Researching…</>
+                      ) : (
+                        <><Brain className="h-3.5 w-3.5 mr-1" /> AI Research</>
+                      )}
+                    </Button>
+                  )}
                   {detailLead.email && !detailLead.email.includes("placeholder") && (
                     <Button size="sm" variant="default" onClick={() => { setDetailLead(null); openEmailDialog(detailLead); }}>
                       <Send className="h-3.5 w-3.5 mr-1" /> Send Email
@@ -613,6 +694,55 @@ export default function Leads() {
                     <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
                   </Button>
                 </div>
+
+                {/* AI Intelligence Panel */}
+                {loadingIntel && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-3">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Loading intelligence…
+                  </div>
+                )}
+                {intelligence && (
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                      <Brain className="h-4 w-4 text-primary" />
+                      AI Company Intelligence
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Researched {new Date(intelligence.researched_at).toLocaleDateString()}
+                    </div>
+
+                    {intelligence.ai_opening_line && (
+                      <div className="rounded-lg border bg-primary/5 p-3 space-y-1">
+                        <div className="flex items-center gap-1 text-xs font-medium text-primary">
+                          <MessageSquare className="h-3 w-3" /> AI Opening Line
+                        </div>
+                        <p className="text-sm italic">"{intelligence.ai_opening_line}"</p>
+                      </div>
+                    )}
+
+                    {intelligence.website_summary && (
+                      <IntelSection icon={Briefcase} label="Summary" value={intelligence.website_summary} />
+                    )}
+                    {intelligence.services && (
+                      <IntelSection icon={Target} label="Services" value={intelligence.services} />
+                    )}
+                    {intelligence.growth_signals && intelligence.growth_signals !== "No clear signals" && (
+                      <IntelSection icon={TrendingUp} label="Growth Signals" value={intelligence.growth_signals} />
+                    )}
+                    {intelligence.hiring_signals && intelligence.hiring_signals !== "No hiring signals" && (
+                      <IntelSection icon={Briefcase} label="Hiring Signals" value={intelligence.hiring_signals} />
+                    )}
+                    {intelligence.marketing_activity && (
+                      <IntelSection icon={Sparkles} label="Marketing Activity" value={intelligence.marketing_activity} />
+                    )}
+                    {intelligence.industry_focus && (
+                      <IntelSection icon={Target} label="Industry Focus" value={intelligence.industry_focus} />
+                    )}
+                    {intelligence.outreach_angle && (
+                      <IntelSection icon={Send} label="Outreach Angle" value={intelligence.outreach_angle} />
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -822,6 +952,17 @@ function LinkRow({ label, url }: { label: string; url: string }) {
       <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-primary flex items-center gap-1 hover:underline">
         <ExternalLink className="h-3 w-3" /> Link
       </a>
+    </div>
+  );
+}
+
+function IntelSection({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+        <Icon className="h-3 w-3" /> {label}
+      </div>
+      <p className="text-sm">{value}</p>
     </div>
   );
 }
