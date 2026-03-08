@@ -253,7 +253,28 @@ export default function ImportLeads() {
         return;
       }
 
-      // Get existing emails to detect duplicates (only for leads with emails)
+      // Resolve category
+      let categoryId = selectedCategory;
+      if (createNewCategory && newCatForm.name.trim()) {
+        const { data: newCat, error: catErr } = await supabase.from("lead_categories").insert([{
+          user_id: user.id, name: newCatForm.name, industry_type: newCatForm.industry_type, description: newCatForm.description,
+        }]).select("id").single();
+        if (catErr || !newCat) { toast({ title: "Error creating category", description: catErr?.message, variant: "destructive" }); setImporting(false); return; }
+        categoryId = newCat.id;
+      }
+
+      // Resolve sheet
+      let sheetId: string | null = selectedSheet || null;
+      const sheetName = createNewSheet && newSheetName.trim() ? newSheetName : file.name.replace(/\.csv$/i, "");
+      if (categoryId && (createNewSheet || !sheetId)) {
+        const { data: newSheet, error: sheetErr } = await supabase.from("lead_sheets").insert([{
+          user_id: user.id, category_id: categoryId, name: sheetName,
+        }]).select("id").single();
+        if (sheetErr || !newSheet) { toast({ title: "Error creating sheet", description: sheetErr?.message, variant: "destructive" }); setImporting(false); return; }
+        sheetId = newSheet.id;
+      }
+
+      // Get existing emails to detect duplicates
       const { data: existingLeads } = await supabase
         .from("leads")
         .select("email")
