@@ -85,6 +85,75 @@ export type Database = {
         }
         Relationships: []
       }
+      company_intelligence: {
+        Row: {
+          ai_opening_line: string | null
+          company_id: string | null
+          created_at: string
+          growth_signals: string | null
+          hiring_signals: string | null
+          id: string
+          industry_focus: string | null
+          lead_id: string
+          marketing_activity: string | null
+          outreach_angle: string | null
+          raw_data: Json | null
+          researched_at: string
+          services: string | null
+          user_id: string
+          website_summary: string | null
+        }
+        Insert: {
+          ai_opening_line?: string | null
+          company_id?: string | null
+          created_at?: string
+          growth_signals?: string | null
+          hiring_signals?: string | null
+          id?: string
+          industry_focus?: string | null
+          lead_id: string
+          marketing_activity?: string | null
+          outreach_angle?: string | null
+          raw_data?: Json | null
+          researched_at?: string
+          services?: string | null
+          user_id: string
+          website_summary?: string | null
+        }
+        Update: {
+          ai_opening_line?: string | null
+          company_id?: string | null
+          created_at?: string
+          growth_signals?: string | null
+          hiring_signals?: string | null
+          id?: string
+          industry_focus?: string | null
+          lead_id?: string
+          marketing_activity?: string | null
+          outreach_angle?: string | null
+          raw_data?: Json | null
+          researched_at?: string
+          services?: string | null
+          user_id?: string
+          website_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_intelligence_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_intelligence_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_assets: {
         Row: {
           category: string | null
