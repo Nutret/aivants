@@ -183,6 +183,8 @@ export default function ImportLeads() {
           company_name: lead.company_name || null,
           title: lead.title || null,
           source: lead.source || "csv_import",
+          website: lead.website || null,
+          linkedin: lead.linkedin || null,
           status: "new" as const,
         }));
 
