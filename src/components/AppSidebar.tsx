@@ -34,7 +34,9 @@ const mainItems = [
   { title: "Leads", url: "/leads", icon: Users },
   { title: "Import", url: "/import", icon: Upload },
   { title: "Campaigns", url: "/campaigns", icon: Megaphone },
+  { title: "Scripts", url: "/scripts", icon: ScrollText },
   { title: "Templates", url: "/templates", icon: FileText },
+  { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
