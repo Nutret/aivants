@@ -56,6 +56,19 @@ export default function SettingsPage() {
         setWebhookSecret((data as any).webhook_secret || "");
         setSettingsId(data.id);
       }
+
+      // Load Telegram link
+      const { data: tgData } = await supabase
+        .from("telegram_users" as any)
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (tgData) {
+        setTelegramLinked(true);
+        setTelegramChatId(String((tgData as any).telegram_chat_id || ""));
+        setTelegramUsername((tgData as any).telegram_username || null);
+      }
+
       setLoadingSettings(false);
     })();
   }, [user]);
