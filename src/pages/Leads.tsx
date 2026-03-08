@@ -519,7 +519,6 @@ export default function Leads() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(lead.id)}>
                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                           </Button>
-                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
