@@ -100,6 +100,10 @@ export default function Leads() {
   const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailTarget, setEmailTarget] = useState<Lead | null>(null);
+  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
+  const [sendingEmail, setSendingEmail] = useState(false);
   const perPage = 10;
 
   const fetchLeads = async () => {
