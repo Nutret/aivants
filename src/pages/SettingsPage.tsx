@@ -449,6 +449,32 @@ export default function SettingsPage() {
                 <Label>Chat ID</Label>
                 <Input value={telegramChatId} disabled className="font-mono text-sm" />
               </div>
+              <Separator />
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notification Preferences</Label>
+                {([
+                  { key: "replies" as const, label: "Reply Alerts", desc: "Get notified when a lead replies to your emails" },
+                  { key: "meetings" as const, label: "Meeting Alerts", desc: "Get notified about meeting bookings and pipeline updates" },
+                  { key: "campaigns" as const, label: "Campaign Alerts", desc: "Get notified about campaign status changes" },
+                ]).map(({ key, label, desc }) => (
+                  <div key={key} className="flex items-center justify-between rounded-md border p-3">
+                    <div>
+                      <p className="text-sm font-medium">{label}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                    <Switch
+                      checked={notifPrefs[key]}
+                      onCheckedChange={(checked) => {
+                        const updated = { ...notifPrefs, [key]: checked };
+                        setNotifPrefs(updated);
+                        handleSaveNotifPrefs(updated);
+                      }}
+                    />
+                  </div>
+                ))}
+                {savingNotifPrefs && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving…</p>}
+              </div>
+              <Separator />
               <Button variant="destructive" size="sm" onClick={handleUnlinkTelegram} disabled={unlinkingTelegram}>
                 {unlinkingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Unlink className="h-4 w-4 mr-2" />}
                 Unlink Telegram
