@@ -1069,6 +1069,62 @@ export type Database = {
           },
         ]
       }
+      revenue_entries: {
+        Row: {
+          amount: number
+          category: string
+          client_id: string | null
+          created_at: string
+          date: string
+          description: string
+          id: string
+          is_recurring: boolean
+          notes: string | null
+          recurring_interval: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          is_recurring?: boolean
+          notes?: string | null
+          recurring_interval?: string | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          is_recurring?: boolean
+          notes?: string | null
+          recurring_interval?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
