@@ -765,13 +765,16 @@ export default function Leads() {
               To: <span className="font-medium text-foreground">{emailTarget?.email}</span>
             </div>
             <div className="space-y-2">
-              <Label>From Email (optional)</Label>
+              <Label>From Email {savedFromEmail ? "" : "(configure in Settings)"}</Label>
               <Input
                 type="email"
                 value={emailForm.from_email}
                 onChange={(e) => setEmailForm({ ...emailForm, from_email: e.target.value })}
-                placeholder="Must be a verified SendGrid sender"
+                placeholder={savedFromEmail || "Configure in Settings → Email Configuration"}
               />
+              {!savedFromEmail && (
+                <p className="text-xs text-muted-foreground">Set your default sender email in Settings to avoid errors.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Subject *</Label>
