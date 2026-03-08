@@ -295,6 +295,40 @@ export default function Leads() {
     toast({ title: `${leadsToExport.length} leads exported` });
   };
 
+  const openEmailDialog = (lead: Lead) => {
+    setEmailTarget(lead);
+    setEmailForm({
+      subject: `Hi ${lead.first_name}, reaching out from our team`,
+      body: `<p>Hi ${lead.first_name},</p><p>I wanted to reach out regarding your business${lead.company_name ? ` at ${lead.company_name}` : ""}.</p><p>Would you be available for a quick call this week?</p><p>Best regards</p>`,
+      from_email: "",
+    });
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailTarget || !emailForm.subject || !emailForm.body) return;
+    setSendingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: {
+          to: emailTarget.email,
+          subject: emailForm.subject,
+          body: emailForm.body,
+          from_email: emailForm.from_email || undefined,
+          lead_id: emailTarget.id,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error + (data.details ? `: ${data.details}` : ""));
+      toast({ title: "Email sent!", description: `Email delivered to ${emailTarget.email}` });
+      setEmailDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Failed to send", description: err.message, variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const updateField = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   return (
