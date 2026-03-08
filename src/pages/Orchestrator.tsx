@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MessageSquare, Linkedin, Loader2, Sparkles, Plus, Send } from "lucide-react";
+import { Mail, Phone, MessageSquare, Linkedin, Loader2, Sparkles, Plus, Send, Bell } from "lucide-react";
+import { useToast as useSonnerToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 const CHANNELS = [
@@ -95,7 +96,69 @@ export default function Orchestrator() {
     setLoading(false);
   };
 
+  const [realtimeCount, setRealtimeCount] = useState(0);
+
   useEffect(() => { fetchData(); }, [user]);
+
+  // Realtime subscription for new/updated email_logs
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("email-logs-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "email_logs",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          // Only notify if a reply was just classified
+          if (updated.reply_classification && updated.replied_at) {
+            setRealtimeCount((c) => c + 1);
+            toast({
+              title: "🔔 New Reply Classified",
+              description: `${updated.reply_classification.replace(/_/g, " ")} — ${updated.reply_sentiment} sentiment`,
+            });
+            // Update the log in-place
+            setEmailLogs((prev) =>
+              prev.map((l) =>
+                l.id === updated.id
+                  ? {
+                      ...l,
+                      reply_classification: updated.reply_classification,
+                      reply_sentiment: updated.reply_sentiment,
+                      reply_body: updated.reply_body,
+                      status: updated.status,
+                    }
+                  : l
+              )
+            );
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "email_logs",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Refetch on new inserts to keep list current
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleClassify = async () => {
     if (!selectedLog || !replyBody.trim()) return;
@@ -171,9 +234,17 @@ export default function Orchestrator() {
           <h1 className="text-3xl font-bold tracking-tight">Orchestrator</h1>
           <p className="text-muted-foreground">Multi-channel outreach & AI deal assistant</p>
         </div>
-        <Button onClick={() => setLogActivityDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Log Activity
-        </Button>
+        <div className="flex items-center gap-3">
+          {realtimeCount > 0 && (
+            <Badge variant="default" className="animate-pulse gap-1">
+              <Bell className="h-3 w-3" />
+              {realtimeCount} new
+            </Badge>
+          )}
+          <Button onClick={() => setLogActivityDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" /> Log Activity
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="replies" className="space-y-4">
