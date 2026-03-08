@@ -155,6 +155,9 @@ function parseCSV(text: string): ParsedLead[] {
 export default function ImportLeads() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const preselectedCategory = searchParams.get("category") || "";
+
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -162,6 +165,32 @@ export default function ImportLeads() {
   const [preview, setPreview] = useState<ParsedLead[]>([]);
   const [detectedCols, setDetectedCols] = useState<string[]>([]);
   const [result, setResult] = useState<{ imported: number; skipped: number; errors: number } | null>(null);
+
+  // Category/Sheet selection
+  const [categories, setCategories] = useState<{ id: string; name: string; industry_type: string }[]>([]);
+  const [sheets, setSheets] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory);
+  const [selectedSheet, setSelectedSheet] = useState("");
+  const [createNewCategory, setCreateNewCategory] = useState(false);
+  const [createNewSheet, setCreateNewSheet] = useState(!preselectedCategory);
+  const [newCatForm, setNewCatForm] = useState({ name: "", industry_type: "Other", description: "" });
+  const [newSheetName, setNewSheetName] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("lead_categories").select("id, name, industry_type").eq("user_id", user.id).order("name").then(({ data }) => {
+      setCategories(data || []);
+      if (!preselectedCategory && (data || []).length === 0) setCreateNewCategory(true);
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!selectedCategory) { setSheets([]); return; }
+    supabase.from("lead_sheets").select("id, name").eq("category_id", selectedCategory).order("name").then(({ data }) => {
+      setSheets(data || []);
+      setCreateNewSheet((data || []).length === 0);
+    });
+  }, [selectedCategory]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
