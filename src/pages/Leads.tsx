@@ -737,6 +737,53 @@ export default function Leads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Email Compose Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Send Email to {emailTarget?.first_name} {emailTarget?.last_name || ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="text-sm text-muted-foreground">
+              To: <span className="font-medium text-foreground">{emailTarget?.email}</span>
+            </div>
+            <div className="space-y-2">
+              <Label>From Email (optional)</Label>
+              <Input
+                type="email"
+                value={emailForm.from_email}
+                onChange={(e) => setEmailForm({ ...emailForm, from_email: e.target.value })}
+                placeholder="Must be a verified SendGrid sender"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Subject *</Label>
+              <Input
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Body (HTML) *</Label>
+              <Textarea
+                value={emailForm.body}
+                onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })}
+                rows={6}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendEmail} disabled={sendingEmail || !emailForm.subject || !emailForm.body}>
+              {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
+              {sendingEmail ? "Sending…" : "Send Email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
