@@ -19,7 +19,9 @@ export default function SettingsPage() {
   // Email config state
   const [fromEmail, setFromEmail] = useState("");
   const [emailProvider, setEmailProvider] = useState("sendgrid");
+  const [webhookSecret, setWebhookSecret] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savingWebhook, setSavingWebhook] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
 
