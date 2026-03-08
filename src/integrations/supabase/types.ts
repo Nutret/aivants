@@ -181,6 +181,7 @@ export type Database = {
           first_name: string
           id: string
           last_name: string | null
+          linkedin: string | null
           notes: string | null
           phone: string | null
           score: number | null
@@ -189,6 +190,7 @@ export type Database = {
           title: string | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           company_id?: string | null
@@ -198,6 +200,7 @@ export type Database = {
           first_name: string
           id?: string
           last_name?: string | null
+          linkedin?: string | null
           notes?: string | null
           phone?: string | null
           score?: number | null
@@ -206,6 +209,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
           company_id?: string | null
@@ -215,6 +219,7 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string | null
+          linkedin?: string | null
           notes?: string | null
           phone?: string | null
           score?: number | null
@@ -223,6 +228,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: [
           {
