@@ -17,6 +17,7 @@ import {
   Briefcase,
   FolderKanban,
   IndianRupee,
+  UsersRound,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -48,6 +49,7 @@ const leadItems = [
 const clientItems = [
   { title: "Clients", url: "/clients", icon: Briefcase },
   { title: "Projects", url: "/projects", icon: FolderKanban },
+  { title: "Team Members", url: "/team", icon: UsersRound },
   { title: "Proposals", url: "/proposals", icon: FileText },
 ];
 
