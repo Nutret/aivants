@@ -41,6 +41,7 @@ const mainItems = [
   { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Sequences", url: "/sequences", icon: Clock },
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
+  { title: "Orchestrator", url: "/orchestrator", icon: Radio },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
 
