@@ -54,6 +54,20 @@ interface Lead {
   created_at: string;
 }
 
+interface CompanyIntelligence {
+  id: string;
+  lead_id: string;
+  website_summary: string;
+  services: string;
+  growth_signals: string;
+  hiring_signals: string;
+  marketing_activity: string;
+  industry_focus: string;
+  outreach_angle: string;
+  ai_opening_line: string;
+  researched_at: string;
+}
+
 const emptyForm = {
   first_name: "", last_name: "", email: "", phone: "", title: "",
   company_name: "", status: "new", source: "", notes: "",
