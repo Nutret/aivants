@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics";
 import Scripts from "./pages/Scripts";
 import ContentLibrary from "./pages/ContentLibrary";
 import Sequences from "./pages/Sequences";
+import Orchestrator from "./pages/Orchestrator";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
