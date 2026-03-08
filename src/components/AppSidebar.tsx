@@ -12,6 +12,7 @@ import {
   ScrollText,
   FolderOpen,
   Clock,
+  Radio,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -40,6 +41,7 @@ const mainItems = [
   { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Sequences", url: "/sequences", icon: Clock },
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
+  { title: "Orchestrator", url: "/orchestrator", icon: Radio },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
 ];
 

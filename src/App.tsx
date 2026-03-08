@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics";
 import Scripts from "./pages/Scripts";
 import ContentLibrary from "./pages/ContentLibrary";
 import Sequences from "./pages/Sequences";
+import Orchestrator from "./pages/Orchestrator";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/sequences" element={<Sequences />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/orchestrator" element={<Orchestrator />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

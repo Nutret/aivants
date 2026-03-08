@@ -55,6 +55,54 @@ export type Database = {
           },
         ]
       }
+      channel_activities: {
+        Row: {
+          activity_type: string
+          campaign_id: string | null
+          channel: string
+          created_at: string
+          id: string
+          lead_id: string | null
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type?: string
+          campaign_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          campaign_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_activities_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
@@ -191,11 +239,15 @@ export type Database = {
         Row: {
           bounced: boolean
           campaign_id: string | null
+          channel: string | null
           created_at: string
           id: string
           lead_id: string | null
           opened_at: string | null
           replied_at: string | null
+          reply_body: string | null
+          reply_classification: string | null
+          reply_sentiment: string | null
           sent_at: string
           status: string
           user_id: string
@@ -203,11 +255,15 @@ export type Database = {
         Insert: {
           bounced?: boolean
           campaign_id?: string | null
+          channel?: string | null
           created_at?: string
           id?: string
           lead_id?: string | null
           opened_at?: string | null
           replied_at?: string | null
+          reply_body?: string | null
+          reply_classification?: string | null
+          reply_sentiment?: string | null
           sent_at?: string
           status?: string
           user_id: string
@@ -215,11 +271,15 @@ export type Database = {
         Update: {
           bounced?: boolean
           campaign_id?: string | null
+          channel?: string | null
           created_at?: string
           id?: string
           lead_id?: string | null
           opened_at?: string | null
           replied_at?: string | null
+          reply_body?: string | null
+          reply_classification?: string | null
+          reply_sentiment?: string | null
           sent_at?: string
           status?: string
           user_id?: string
@@ -591,6 +651,7 @@ export type Database = {
         Row: {
           client_won: boolean
           created_at: string
+          deal_value: number | null
           id: string
           lead_id: string
           meeting_booked: boolean
@@ -601,6 +662,7 @@ export type Database = {
         Insert: {
           client_won?: boolean
           created_at?: string
+          deal_value?: number | null
           id?: string
           lead_id: string
           meeting_booked?: boolean
@@ -611,6 +673,7 @@ export type Database = {
         Update: {
           client_won?: boolean
           created_at?: string
+          deal_value?: number | null
           id?: string
           lead_id?: string
           meeting_booked?: boolean
