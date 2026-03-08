@@ -14,7 +14,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MessageSquare, Linkedin, Loader2, Sparkles, Plus, Send } from "lucide-react";
+import { Mail, Phone, MessageSquare, Linkedin, Loader2, Sparkles, Plus, Send, Bell } from "lucide-react";
+import { useToast as useSonnerToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 const CHANNELS = [
