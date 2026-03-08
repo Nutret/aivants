@@ -318,6 +318,7 @@ export default function ImportLeads() {
           reviews: lead.reviews ?? 0,
           address: lead.address || null,
           industry: lead.industry || null,
+          sheet_id: sheetId || null,
           status: "new" as const,
         }));
 
