@@ -174,59 +174,83 @@ export type Database = {
       }
       leads: {
         Row: {
+          address: string | null
           company_id: string | null
           company_name: string | null
           created_at: string
           email: string
           first_name: string
           id: string
+          industry: string | null
           last_name: string | null
           linkedin: string | null
+          location: string | null
           notes: string | null
           phone: string | null
+          query: string | null
+          rating: number | null
+          reviews: number | null
           score: number | null
           source: string | null
           status: string
+          tags: string[] | null
           title: string | null
           updated_at: string
+          url: string | null
           user_id: string
           website: string | null
         }
         Insert: {
+          address?: string | null
           company_id?: string | null
           company_name?: string | null
           created_at?: string
           email: string
           first_name: string
           id?: string
+          industry?: string | null
           last_name?: string | null
           linkedin?: string | null
+          location?: string | null
           notes?: string | null
           phone?: string | null
+          query?: string | null
+          rating?: number | null
+          reviews?: number | null
           score?: number | null
           source?: string | null
           status?: string
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
+          url?: string | null
           user_id: string
           website?: string | null
         }
         Update: {
+          address?: string | null
           company_id?: string | null
           company_name?: string | null
           created_at?: string
           email?: string
           first_name?: string
           id?: string
+          industry?: string | null
           last_name?: string | null
           linkedin?: string | null
+          location?: string | null
           notes?: string | null
           phone?: string | null
+          query?: string | null
+          rating?: number | null
+          reviews?: number | null
           score?: number | null
           source?: string | null
           status?: string
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
+          url?: string | null
           user_id?: string
           website?: string | null
         }
