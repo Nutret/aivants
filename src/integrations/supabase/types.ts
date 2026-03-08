@@ -103,6 +103,57 @@ export type Database = {
           },
         ]
       }
+      clients: {
+        Row: {
+          company: string | null
+          contract_end: string | null
+          contract_start: string | null
+          created_at: string
+          email: string | null
+          id: string
+          industry: string | null
+          monthly_payment: number | null
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          monthly_payment?: number | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          industry?: string | null
+          monthly_payment?: number | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           created_at: string
@@ -825,6 +876,175 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_milestones: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          project_id: string
+          title: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          project_id: string
+          title: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_team_assignments: {
+        Row: {
+          assigned_at: string
+          id: string
+          project_id: string
+          role: string | null
+          team_member_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          project_id: string
+          role?: string | null
+          team_member_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          project_id?: string
+          role?: string | null
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_team_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_team_assignments_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          client_id: string | null
+          client_notifications: boolean
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          name: string
+          notes: string | null
+          start_date: string | null
+          status: string
+          team_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_notifications?: boolean
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          team_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          client_notifications?: boolean
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          start_date?: string | null
+          status?: string
+          team_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          monthly_cost: number | null
+          name: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          monthly_cost?: number | null
+          name: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          monthly_cost?: number | null
+          name?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       telegram_users: {
         Row: {
