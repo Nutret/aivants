@@ -25,6 +25,13 @@ export default function SettingsPage() {
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
 
+  // Telegram state
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [telegramLinked, setTelegramLinked] = useState(false);
+  const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
+  const [savingTelegram, setSavingTelegram] = useState(false);
+  const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
+
   // Test email state
   const [sending, setSending] = useState(false);
   const [testEmail, setTestEmail] = useState({
