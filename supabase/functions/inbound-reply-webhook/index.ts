@@ -327,6 +327,39 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send Telegram notification for all classified replies
+    try {
+      const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      if (BOT_TOKEN) {
+        const { data: tgUser } = await serviceClient
+          .from("telegram_users")
+          .select("telegram_chat_id")
+          .eq("user_id", lead.user_id)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (tgUser?.telegram_chat_id) {
+          const emoji = priority === "high" ? "🔥" : classification === "meeting_request" ? "📅" : "💬";
+          const tgMsg =
+            `${emoji} <b>New Lead Reply</b>\n\n` +
+            `👤 Lead: ${fromEmail}\n` +
+            `📊 Classification: <b>${classification.replace(/_/g, " ")}</b>\n` +
+            `💭 Sentiment: ${sentiment}\n` +
+            `⚡ Priority: ${priority}\n\n` +
+            `💬 Reply:\n"${replyBody.substring(0, 300)}${replyBody.length > 300 ? "..." : ""}"\n\n` +
+            `🎯 <b>Recommended:</b> ${suggestedAction}`;
+
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: tgUser.telegram_chat_id, text: tgMsg, parse_mode: "HTML" }),
+          });
+        }
+      }
+    } catch (tgErr) {
+      console.error("Telegram notification failed:", tgErr);
+    }
+
     return new Response(
       JSON.stringify({
         status: "processed",

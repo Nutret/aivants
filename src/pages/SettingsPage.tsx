@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw } from "lucide-react";
+import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw, MessageCircle, Link2, Unlink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -24,6 +24,13 @@ export default function SettingsPage() {
   const [savingWebhook, setSavingWebhook] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
+
+  // Telegram state
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [telegramLinked, setTelegramLinked] = useState(false);
+  const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
+  const [savingTelegram, setSavingTelegram] = useState(false);
+  const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
 
   // Test email state
   const [sending, setSending] = useState(false);
@@ -49,6 +56,19 @@ export default function SettingsPage() {
         setWebhookSecret((data as any).webhook_secret || "");
         setSettingsId(data.id);
       }
+
+      // Load Telegram link
+      const { data: tgData } = await supabase
+        .from("telegram_users" as any)
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (tgData) {
+        setTelegramLinked(true);
+        setTelegramChatId(String((tgData as any).telegram_chat_id || ""));
+        setTelegramUsername((tgData as any).telegram_username || null);
+      }
+
       setLoadingSettings(false);
     })();
   }, [user]);
@@ -144,6 +164,44 @@ export default function SettingsPage() {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: "Copied to clipboard" });
+  };
+
+  const handleLinkTelegram = async () => {
+    if (!user || !telegramChatId.trim()) {
+      toast({ title: "Missing Chat ID", description: "Enter your Telegram Chat ID.", variant: "destructive" });
+      return;
+    }
+    setSavingTelegram(true);
+    try {
+      const { error } = await supabase.from("telegram_users" as any).insert({
+        user_id: user.id,
+        telegram_chat_id: parseInt(telegramChatId.trim()),
+      } as any);
+      if (error) throw error;
+      setTelegramLinked(true);
+      toast({ title: "Telegram Linked!", description: "Your bot will now send notifications." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingTelegram(false);
+    }
+  };
+
+  const handleUnlinkTelegram = async () => {
+    if (!user) return;
+    setUnlinkingTelegram(true);
+    try {
+      const { error } = await supabase.from("telegram_users" as any).delete().eq("user_id", user.id);
+      if (error) throw error;
+      setTelegramLinked(false);
+      setTelegramChatId("");
+      setTelegramUsername(null);
+      toast({ title: "Telegram Unlinked" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUnlinkingTelegram(false);
+    }
   };
 
   return (
@@ -355,6 +413,63 @@ export default function SettingsPage() {
             {savingWebhook ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
             {savingWebhook ? "Saving…" : "Save Webhook Secret"}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Telegram Bot Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            Telegram Bot
+          </CardTitle>
+          <CardDescription>
+            Link your Telegram account to receive notifications and control Aivants from Telegram.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {telegramLinked ? (
+            <>
+              <div className="flex items-center gap-2 text-sm bg-success/10 text-success p-3 rounded-md">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Telegram is <b>linked</b>!</span>
+                {telegramUsername && <span className="text-muted-foreground">(@{telegramUsername})</span>}
+              </div>
+              <div>
+                <Label>Chat ID</Label>
+                <Input value={telegramChatId} disabled className="font-mono text-sm" />
+              </div>
+              <Button variant="destructive" size="sm" onClick={handleUnlinkTelegram} disabled={unlinkingTelegram}>
+                {unlinkingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Unlink className="h-4 w-4 mr-2" />}
+                Unlink Telegram
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  <b>How to link:</b><br/>
+                  1. Open Telegram and search for your Aivants bot<br/>
+                  2. Send <code>/start</code> to the bot<br/>
+                  3. Copy the Chat ID the bot gives you<br/>
+                  4. Paste it below and click "Link Account"
+                </p>
+                <div>
+                  <Label>Telegram Chat ID</Label>
+                  <Input
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    placeholder="e.g. 123456789"
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+              <Button onClick={handleLinkTelegram} disabled={savingTelegram || !telegramChatId.trim()}>
+                {savingTelegram ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
+                {savingTelegram ? "Linking…" : "Link Account"}
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
