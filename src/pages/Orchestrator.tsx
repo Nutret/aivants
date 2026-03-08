@@ -96,7 +96,69 @@ export default function Orchestrator() {
     setLoading(false);
   };
 
+  const [realtimeCount, setRealtimeCount] = useState(0);
+
   useEffect(() => { fetchData(); }, [user]);
+
+  // Realtime subscription for new/updated email_logs
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("email-logs-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "email_logs",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          // Only notify if a reply was just classified
+          if (updated.reply_classification && updated.replied_at) {
+            setRealtimeCount((c) => c + 1);
+            toast({
+              title: "🔔 New Reply Classified",
+              description: `${updated.reply_classification.replace(/_/g, " ")} — ${updated.reply_sentiment} sentiment`,
+            });
+            // Update the log in-place
+            setEmailLogs((prev) =>
+              prev.map((l) =>
+                l.id === updated.id
+                  ? {
+                      ...l,
+                      reply_classification: updated.reply_classification,
+                      reply_sentiment: updated.reply_sentiment,
+                      reply_body: updated.reply_body,
+                      status: updated.status,
+                    }
+                  : l
+              )
+            );
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "email_logs",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Refetch on new inserts to keep list current
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const handleClassify = async () => {
     if (!selectedLog || !replyBody.trim()) return;
