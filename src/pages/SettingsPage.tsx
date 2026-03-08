@@ -197,6 +197,22 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSaveNotifPrefs = async (prefs: typeof notifPrefs) => {
+    if (!user) return;
+    setSavingNotifPrefs(true);
+    try {
+      const { error } = await supabase
+        .from("telegram_users" as any)
+        .update({ notification_prefs: prefs } as any)
+        .eq("user_id", user.id);
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingNotifPrefs(false);
+    }
+  };
+
   const handleUnlinkTelegram = async () => {
     if (!user) return;
     setUnlinkingTelegram(true);
