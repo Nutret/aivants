@@ -18,6 +18,8 @@ import {
   FolderKanban,
   IndianRupee,
   UsersRound,
+  Bot,
+  BookOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -67,6 +69,11 @@ const insightItems = [
   { title: "Revenue", url: "/revenue", icon: IndianRupee },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Orchestrator", url: "/orchestrator", icon: Radio },
+];
+
+const aiItems = [
+  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+  { title: "Knowledge Base", url: "/knowledge-base", icon: BookOpen },
 ];
 
 const bottomItems = [
@@ -128,6 +135,7 @@ export function AppSidebar() {
         {renderGroup("Clients & Projects", clientItems)}
         {renderGroup("Outreach", outreachItems)}
         {renderGroup("Insights & Revenue", insightItems)}
+        {renderGroup("AI", aiItems)}
       </SidebarContent>
 
       <SidebarFooter>

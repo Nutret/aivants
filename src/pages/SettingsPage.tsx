@@ -12,6 +12,7 @@ import { Send, Loader2, Save, Mail, CheckCircle2, Shield, Copy, RefreshCw, Messa
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AISettingsSection } from "@/components/AISettingsSection";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -524,6 +525,9 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Settings */}
+      <AISettingsSection />
     </div>
   );
 }
