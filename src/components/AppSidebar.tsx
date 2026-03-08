@@ -12,6 +12,7 @@ import {
   ScrollText,
   FolderOpen,
   Clock,
+  CalendarClock,
   Radio,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
