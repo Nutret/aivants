@@ -32,6 +32,8 @@ export default function SettingsPage() {
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [savingTelegram, setSavingTelegram] = useState(false);
   const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState({ replies: true, meetings: true, campaigns: true });
+  const [savingNotifPrefs, setSavingNotifPrefs] = useState(false);
 
   // Test email state
   const [sending, setSending] = useState(false);
