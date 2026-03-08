@@ -1013,6 +1013,62 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          amount: number | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          description: string | null
+          document_name: string | null
+          document_url: string | null
+          id: string
+          industry: string | null
+          name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          description?: string | null
+          document_name?: string | null
+          document_url?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          description?: string | null
+          document_name?: string | null
+          document_url?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
