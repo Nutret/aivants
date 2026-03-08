@@ -242,8 +242,9 @@ export default function Orchestrator() {
             </Badge>
           )}
           <Button onClick={() => setLogActivityDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Log Activity
-        </Button>
+            <Plus className="h-4 w-4 mr-2" /> Log Activity
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="replies" className="space-y-4">
