@@ -587,7 +587,12 @@ export default function Leads() {
                 {detailLead.notes && <DetailRow label="Notes" value={detailLead.notes} />}
 
                 <div className="pt-4 flex gap-2">
-                  <Button size="sm" onClick={() => { setDetailLead(null); openEdit(detailLead); }}>
+                  {detailLead.email && !detailLead.email.includes("placeholder") && (
+                    <Button size="sm" variant="default" onClick={() => { setDetailLead(null); openEmailDialog(detailLead); }}>
+                      <Send className="h-3.5 w-3.5 mr-1" /> Send Email
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" onClick={() => { setDetailLead(null); openEdit(detailLead); }}>
                     <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => { setDetailLead(null); setDeleteId(detailLead.id); }}>
