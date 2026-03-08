@@ -171,11 +171,16 @@ export default function SettingsPage() {
       toast({ title: "Missing Chat ID", description: "Enter your Telegram Chat ID.", variant: "destructive" });
       return;
     }
+    const chatIdNum = Number(telegramChatId.trim());
+    if (!chatIdNum || isNaN(chatIdNum)) {
+      toast({ title: "Invalid Chat ID", description: "Chat ID must be a number. Send /start to the bot to get it.", variant: "destructive" });
+      return;
+    }
     setSavingTelegram(true);
     try {
       const { error } = await supabase.from("telegram_users" as any).insert({
         user_id: user.id,
-        telegram_chat_id: parseInt(telegramChatId.trim()),
+        telegram_chat_id: chatIdNum,
       } as any);
       if (error) throw error;
       setTelegramLinked(true);
