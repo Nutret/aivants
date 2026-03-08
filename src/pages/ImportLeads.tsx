@@ -304,10 +304,10 @@ export default function ImportLeads() {
         </CardHeader>
         <CardContent>
           <code className="block rounded-lg bg-muted p-4 text-sm font-mono">
-            first_name, last_name, email, phone, company_name, title, source
+            Full Name, Email, Company, Website, LinkedIn
           </code>
           <p className="text-xs text-muted-foreground mt-2">
-            Required columns: <strong>first_name</strong> and <strong>email</strong>. All other columns are optional.
+            Also supports: first_name, last_name, phone, title, source. Required: <strong>Name</strong> (or first_name) and <strong>Email</strong>.
           </p>
         </CardContent>
       </Card>
