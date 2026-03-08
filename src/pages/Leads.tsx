@@ -508,11 +508,17 @@ export default function Leads() {
                       <TableCell>{getStatusBadge(lead.status)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          {lead.email && !lead.email.includes("placeholder") && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEmailDialog(lead)} title="Send Email">
+                              <Mail className="h-3.5 w-3.5 text-primary" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(lead)}>
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(lead.id)}>
                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </Button>
                           </Button>
                         </div>
                       </TableCell>
