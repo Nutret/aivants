@@ -362,9 +362,86 @@ export default function ImportLeads() {
         <p className="text-muted-foreground">Upload a CSV file to import leads</p>
       </div>
 
+      {/* Step 1: Category & Sheet Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Upload File</CardTitle>
+          <CardTitle className="flex items-center gap-2"><FolderOpen className="h-5 w-5" /> Step 1 — Select Category & Sheet</CardTitle>
+          <CardDescription>Organize your imported leads into an industry category</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              {!createNewCategory ? (
+                <div className="space-y-2">
+                  <Select value={selectedCategory} onValueChange={(v) => { setSelectedCategory(v); setSelectedSheet(""); }}>
+                    <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name} — {c.industry_type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewCategory(true)}>
+                    <Plus className="h-3 w-3 mr-1" /> Create new category
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2 rounded-lg border p-3">
+                  <Input placeholder="Category name" value={newCatForm.name} onChange={(e) => setNewCatForm((f) => ({ ...f, name: e.target.value }))} />
+                  <Select value={newCatForm.industry_type} onValueChange={(v) => setNewCatForm((f) => ({ ...f, industry_type: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["Real Estate", "Automotive", "Finance", "Government", "Healthcare", "Technology", "Retail", "Other"].map((ind) => (
+                        <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input placeholder="Description (optional)" value={newCatForm.description} onChange={(e) => setNewCatForm((f) => ({ ...f, description: e.target.value }))} />
+                  {categories.length > 0 && (
+                    <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewCategory(false)}>
+                      Use existing category
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Lead Sheet</Label>
+              {!createNewSheet ? (
+                <div className="space-y-2">
+                  <Select value={selectedSheet} onValueChange={setSelectedSheet}>
+                    <SelectTrigger><SelectValue placeholder="Select a sheet" /></SelectTrigger>
+                    <SelectContent>
+                      {sheets.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewSheet(true)}>
+                    <Plus className="h-3 w-3 mr-1" /> Create new sheet
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Input placeholder="Sheet name (or auto-generated from filename)" value={newSheetName} onChange={(e) => setNewSheetName(e.target.value)} />
+                  {sheets.length > 0 && (
+                    <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewSheet(false)}>
+                      Use existing sheet
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Step 2: Upload File */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Step 2 — Upload File</CardTitle>
           <CardDescription>Auto-detects columns from your CSV headers</CardDescription>
         </CardHeader>
         <CardContent>
