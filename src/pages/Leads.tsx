@@ -286,6 +286,10 @@ export default function Leads() {
           <Plus className="h-4 w-4 mr-2" />
           Add Lead
         </Button>
+        <Button variant="outline" onClick={handleExport}>
+          <Download className="h-4 w-4 mr-2" />
+          {selected.size > 0 ? `Export (${selected.size})` : "Export All"}
+        </Button>
       </div>
 
       <Card>
