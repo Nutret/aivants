@@ -12,6 +12,7 @@ import {
   ScrollText,
   FolderOpen,
   Clock,
+  CalendarClock,
   Radio,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
@@ -40,6 +41,7 @@ const mainItems = [
   { title: "Templates", url: "/templates", icon: FileText },
   { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Sequences", url: "/sequences", icon: Clock },
+  { title: "Follow-Ups", url: "/followups", icon: CalendarClock },
   { title: "Pipeline", url: "/pipeline", icon: Kanban },
   { title: "Orchestrator", url: "/orchestrator", icon: Radio },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },

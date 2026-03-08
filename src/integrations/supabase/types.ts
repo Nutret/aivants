@@ -338,6 +338,8 @@ export type Database = {
         Row: {
           campaign_id: string | null
           created_at: string
+          description: string | null
+          followup_type: string
           id: string
           is_active: boolean
           name: string
@@ -347,6 +349,8 @@ export type Database = {
         Insert: {
           campaign_id?: string | null
           created_at?: string
+          description?: string | null
+          followup_type?: string
           id?: string
           is_active?: boolean
           name: string
@@ -356,6 +360,8 @@ export type Database = {
         Update: {
           campaign_id?: string | null
           created_at?: string
+          description?: string | null
+          followup_type?: string
           id?: string
           is_active?: boolean
           name?: string
@@ -375,12 +381,15 @@ export type Database = {
       followup_status: {
         Row: {
           campaign_id: string | null
+          condition_stop_on: string | null
           created_at: string
           current_step: number
+          followup_type: string
           id: string
           last_email_sent_at: string | null
           lead_id: string
           next_followup_date: string | null
+          scheduled_date: string | null
           sequence_id: string
           status: string
           updated_at: string
@@ -388,12 +397,15 @@ export type Database = {
         }
         Insert: {
           campaign_id?: string | null
+          condition_stop_on?: string | null
           created_at?: string
           current_step?: number
+          followup_type?: string
           id?: string
           last_email_sent_at?: string | null
           lead_id: string
           next_followup_date?: string | null
+          scheduled_date?: string | null
           sequence_id: string
           status?: string
           updated_at?: string
@@ -401,12 +413,15 @@ export type Database = {
         }
         Update: {
           campaign_id?: string | null
+          condition_stop_on?: string | null
           created_at?: string
           current_step?: number
+          followup_type?: string
           id?: string
           last_email_sent_at?: string | null
           lead_id?: string
           next_followup_date?: string | null
+          scheduled_date?: string | null
           sequence_id?: string
           status?: string
           updated_at?: string
@@ -438,12 +453,14 @@ export type Database = {
       }
       followup_steps: {
         Row: {
+          action_type: string
           body_override: string | null
           channel: string
           content_asset_id: string | null
           created_at: string
           delay_days: number
           id: string
+          notes: string | null
           script_id: string | null
           sequence_id: string
           step_number: number
@@ -451,12 +468,14 @@ export type Database = {
           template_id: string | null
         }
         Insert: {
+          action_type?: string
           body_override?: string | null
           channel?: string
           content_asset_id?: string | null
           created_at?: string
           delay_days?: number
           id?: string
+          notes?: string | null
           script_id?: string | null
           sequence_id: string
           step_number?: number
@@ -464,12 +483,14 @@ export type Database = {
           template_id?: string | null
         }
         Update: {
+          action_type?: string
           body_override?: string | null
           channel?: string
           content_asset_id?: string | null
           created_at?: string
           delay_days?: number
           id?: string
+          notes?: string | null
           script_id?: string | null
           sequence_id?: string
           step_number?: number
