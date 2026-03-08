@@ -102,8 +102,9 @@ export default function Leads() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailTarget, setEmailTarget] = useState<Lead | null>(null);
-  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "value@zatics.vision" });
+  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [savedFromEmail, setSavedFromEmail] = useState("");
   const perPage = 10;
 
   const fetchLeads = async () => {
@@ -295,12 +296,25 @@ export default function Leads() {
     toast({ title: `${leadsToExport.length} leads exported` });
   };
 
+  // Load saved from_email from user_settings
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("from_email")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data?.from_email) setSavedFromEmail(data.from_email);
+    })();
+  }, [user]);
+
   const openEmailDialog = (lead: Lead) => {
     setEmailTarget(lead);
     setEmailForm({
       subject: `Hi ${lead.first_name}, reaching out from our team`,
       body: `<p>Hi ${lead.first_name},</p><p>I wanted to reach out regarding your business${lead.company_name ? ` at ${lead.company_name}` : ""}.</p><p>Would you be available for a quick call this week?</p><p>Best regards</p>`,
-      from_email: "",
+      from_email: savedFromEmail,
     });
     setEmailDialogOpen(true);
   };
@@ -751,13 +765,16 @@ export default function Leads() {
               To: <span className="font-medium text-foreground">{emailTarget?.email}</span>
             </div>
             <div className="space-y-2">
-              <Label>From Email (optional)</Label>
+              <Label>From Email {savedFromEmail ? "" : "(configure in Settings)"}</Label>
               <Input
                 type="email"
                 value={emailForm.from_email}
                 onChange={(e) => setEmailForm({ ...emailForm, from_email: e.target.value })}
-                placeholder="Must be a verified SendGrid sender"
+                placeholder={savedFromEmail || "Configure in Settings → Email Configuration"}
               />
+              {!savedFromEmail && (
+                <p className="text-xs text-muted-foreground">Set your default sender email in Settings to avoid errors.</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Subject *</Label>
