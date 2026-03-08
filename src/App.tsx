@@ -54,6 +54,7 @@ const App = () => (
               <Route path="/scripts" element={<Scripts />} />
               <Route path="/content" element={<ContentLibrary />} />
               <Route path="/sequences" element={<Sequences />} />
+              <Route path="/followups" element={<FollowUps />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/orchestrator" element={<Orchestrator />} />
