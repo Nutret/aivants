@@ -577,6 +577,18 @@ export default function Leads() {
                       <TableCell>{getStatusBadge(lead.status)}</TableCell>
                       <TableCell>
                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          {(lead.website || lead.url) && (
+                            <Button
+                              variant="ghost" size="icon" className="h-8 w-8"
+                              onClick={() => handleResearch(lead)}
+                              disabled={researching === lead.id}
+                              title="AI Research"
+                            >
+                              {researching === lead.id
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <Brain className="h-3.5 w-3.5 text-accent-foreground" />}
+                            </Button>
+                          )}
                           {lead.email && !lead.email.includes("placeholder") && (
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEmailDialog(lead)} title="Send Email">
                               <Mail className="h-3.5 w-3.5 text-primary" />
