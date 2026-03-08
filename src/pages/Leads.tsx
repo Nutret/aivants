@@ -18,7 +18,10 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ExternalLink, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -35,12 +38,23 @@ interface Lead {
   score: number | null;
   source: string | null;
   notes: string | null;
+  website: string | null;
+  linkedin: string | null;
+  url: string | null;
+  query: string | null;
+  rating: number | null;
+  reviews: number | null;
+  address: string | null;
+  industry: string | null;
+  location: string | null;
   created_at: string;
 }
 
 const emptyForm = {
   first_name: "", last_name: "", email: "", phone: "", title: "",
   company_name: "", status: "new", source: "", notes: "",
+  website: "", linkedin: "", url: "", query: "",
+  rating: "", reviews: "", address: "", industry: "",
 };
 
 function getScoreBadge(score: number | null) {
@@ -75,6 +89,7 @@ export default function Leads() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Lead | null>(null);
+  const [detailLead, setDetailLead] = useState<Lead | null>(null);
   const [form, setForm] = useState(emptyForm);
   const perPage = 10;
 
@@ -99,7 +114,7 @@ export default function Leads() {
   const filtered = leads.filter((lead) => {
     const matchesSearch =
       !search ||
-      `${lead.first_name} ${lead.last_name || ""} ${lead.company_name || ""} ${lead.email}`
+      `${lead.first_name} ${lead.last_name || ""} ${lead.company_name || ""} ${lead.email} ${lead.address || ""} ${lead.query || ""}`
         .toLowerCase()
         .includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
@@ -127,23 +142,39 @@ export default function Leads() {
       status: lead.status,
       source: lead.source || "",
       notes: lead.notes || "",
+      website: lead.website || "",
+      linkedin: lead.linkedin || "",
+      url: lead.url || "",
+      query: lead.query || "",
+      rating: lead.rating?.toString() || "",
+      reviews: lead.reviews?.toString() || "",
+      address: lead.address || "",
+      industry: lead.industry || "",
     });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!user || !form.first_name.trim() || !form.email.trim()) return;
+    if (!user || !form.first_name.trim()) return;
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       first_name: form.first_name,
       last_name: form.last_name || null,
-      email: form.email,
+      email: form.email || `no-email-${Date.now()}@placeholder.local`,
       phone: form.phone || null,
       title: form.title || null,
       company_name: form.company_name || null,
       status: form.status,
       source: form.source || null,
       notes: form.notes || null,
+      website: form.website || null,
+      linkedin: form.linkedin || null,
+      url: form.url || null,
+      query: form.query || null,
+      rating: form.rating ? parseFloat(form.rating) : null,
+      reviews: form.reviews ? parseInt(form.reviews, 10) : 0,
+      address: form.address || null,
+      industry: form.industry || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -152,7 +183,7 @@ export default function Leads() {
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Lead updated" });
     } else {
-      const { error } = await supabase.from("leads").insert({ ...payload, user_id: user.id });
+      const { error } = await supabase.from("leads").insert([{ ...payload, user_id: user.id }] as any);
       if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Lead created" });
     }
@@ -220,7 +251,7 @@ export default function Leads() {
             <div className="p-8 text-center text-muted-foreground">Loading leads…</div>
           ) : filtered.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
-              {leads.length === 0 ? "No leads yet. Add your first lead to get started." : "No leads match your filters."}
+              {leads.length === 0 ? "No leads yet. Add your first lead or import a CSV." : "No leads match your filters."}
             </div>
           ) : (
             <>
@@ -229,33 +260,45 @@ export default function Leads() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="hidden lg:table-cell">Title</TableHead>
-                    <TableHead className="hidden md:table-cell">Source</TableHead>
-                    <TableHead>Score</TableHead>
+                    <TableHead className="hidden md:table-cell">Phone</TableHead>
+                    <TableHead className="hidden lg:table-cell">Rating</TableHead>
+                    <TableHead className="hidden xl:table-cell">Address</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginated.map((lead) => (
-                    <TableRow key={lead.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableRow
+                      key={lead.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setDetailLead(lead)}
+                    >
                       <TableCell className="font-medium">
-                        {lead.first_name} {lead.last_name || ""}
+                        <div>{lead.first_name} {lead.last_name || ""}</div>
+                        {lead.email && !lead.email.includes("placeholder") && (
+                          <div className="text-xs text-muted-foreground">{lead.email}</div>
+                        )}
                       </TableCell>
                       <TableCell>{lead.company_name || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{lead.email}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{lead.title || "—"}</TableCell>
-                      <TableCell className="hidden md:table-cell">{lead.source || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {lead.score != null && <span className="font-mono text-sm">{lead.score}</span>}
-                          {getScoreBadge(lead.score)}
-                        </div>
+                      <TableCell className="hidden md:table-cell">{lead.phone || "—"}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        {lead.rating != null ? (
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-warning text-warning" />
+                            <span className="text-sm">{lead.rating}</span>
+                            {lead.reviews != null && lead.reviews > 0 && (
+                              <span className="text-xs text-muted-foreground">({lead.reviews})</span>
+                            )}
+                          </div>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell max-w-[200px] truncate">
+                        {lead.address || "—"}
                       </TableCell>
                       <TableCell>{getStatusBadge(lead.status)}</TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(lead)}>
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -269,9 +312,7 @@ export default function Leads() {
                 </TableBody>
               </Table>
               <div className="flex items-center justify-between border-t p-4">
-                <div className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
-                </div>
+                <div className="text-sm text-muted-foreground">Page {page} of {totalPages}</div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
                     <ChevronLeft className="h-4 w-4" />
@@ -286,67 +327,164 @@ export default function Leads() {
         </CardContent>
       </Card>
 
+      {/* Lead Detail Sheet */}
+      <Sheet open={!!detailLead} onOpenChange={(open) => !open && setDetailLead(null)}>
+        <SheetContent className="overflow-y-auto">
+          {detailLead && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{detailLead.first_name} {detailLead.last_name || ""}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-4">
+                {detailLead.company_name && (
+                  <DetailRow label="Company" value={detailLead.company_name} />
+                )}
+                {detailLead.email && !detailLead.email.includes("placeholder") && (
+                  <DetailRow label="Email" value={detailLead.email} />
+                )}
+                {detailLead.phone && <DetailRow label="Phone" value={detailLead.phone} />}
+                {detailLead.title && <DetailRow label="Title" value={detailLead.title} />}
+                {detailLead.address && <DetailRow label="Address" value={detailLead.address} />}
+                {detailLead.industry && <DetailRow label="Industry" value={detailLead.industry} />}
+                {detailLead.query && <DetailRow label="Query / Category" value={detailLead.query} />}
+                {detailLead.rating != null && (
+                  <div className="flex justify-between py-2 border-b">
+                    <span className="text-sm text-muted-foreground">Rating</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-warning text-warning" />
+                      <span className="text-sm font-medium">{detailLead.rating}</span>
+                      {detailLead.reviews != null && detailLead.reviews > 0 && (
+                        <span className="text-xs text-muted-foreground">({detailLead.reviews} reviews)</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {detailLead.website && (
+                  <LinkRow label="Website" url={detailLead.website} />
+                )}
+                {detailLead.url && (
+                  <LinkRow label="URL" url={detailLead.url} />
+                )}
+                {detailLead.linkedin && (
+                  <LinkRow label="LinkedIn" url={detailLead.linkedin} />
+                )}
+                {detailLead.source && <DetailRow label="Source" value={detailLead.source} />}
+                <DetailRow label="Status" value={detailLead.status} />
+                {detailLead.notes && <DetailRow label="Notes" value={detailLead.notes} />}
+
+                <div className="pt-4 flex gap-2">
+                  <Button size="sm" onClick={() => { setDetailLead(null); openEdit(detailLead); }}>
+                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => { setDetailLead(null); setDeleteId(detailLead.id); }}>
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Lead" : "Add Lead"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">First Name *</Label>
-                <Input id="first_name" value={form.first_name} onChange={(e) => updateField("first_name", e.target.value)} />
+                <Label>First Name *</Label>
+                <Input value={form.first_name} onChange={(e) => updateField("first_name", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name</Label>
-                <Input id="last_name" value={form.last_name} onChange={(e) => updateField("last_name", e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input id="email" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" value={form.title} onChange={(e) => updateField("title", e.target.value)} />
+                <Label>Last Name</Label>
+                <Input value={form.last_name} onChange={(e) => updateField("last_name", e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="company_name">Company</Label>
-                <Input id="company_name" value={form.company_name} onChange={(e) => updateField("company_name", e.target.value)} />
+                <Label>Email</Label>
+                <Input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="source">Source</Label>
-                <Input id="source" value={form.source} onChange={(e) => updateField("source", e.target.value)} placeholder="e.g. LinkedIn, Referral" />
+                <Label>Phone</Label>
+                <Input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input value={form.company_name} onChange={(e) => updateField("company_name", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Title / Role</Label>
+                <Input value={form.title} onChange={(e) => updateField("title", e.target.value)} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={form.status} onValueChange={(v) => updateField("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="contacted">Contacted</SelectItem>
-                  <SelectItem value="interested">Interested</SelectItem>
-                  <SelectItem value="meeting">Meeting</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Address</Label>
+              <Input value={form.address} onChange={(e) => updateField("address", e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Industry</Label>
+                <Input value={form.industry} onChange={(e) => updateField("industry", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Query / Category</Label>
+                <Input value={form.query} onChange={(e) => updateField("query", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Rating</Label>
+                <Input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => updateField("rating", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Reviews</Label>
+                <Input type="number" min="0" value={form.reviews} onChange={(e) => updateField("reviews", e.target.value)} />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" value={form.notes} onChange={(e) => updateField("notes", e.target.value)} rows={3} />
+              <Label>Website</Label>
+              <Input value={form.website} onChange={(e) => updateField("website", e.target.value)} placeholder="https://" />
+            </div>
+            <div className="space-y-2">
+              <Label>URL (Maps / Profile)</Label>
+              <Input value={form.url} onChange={(e) => updateField("url", e.target.value)} placeholder="https://" />
+            </div>
+            <div className="space-y-2">
+              <Label>LinkedIn</Label>
+              <Input value={form.linkedin} onChange={(e) => updateField("linkedin", e.target.value)} placeholder="https://linkedin.com/in/..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source</Label>
+                <Input value={form.source} onChange={(e) => updateField("source", e.target.value)} placeholder="e.g. Google Maps, LinkedIn" />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={(v) => updateField("status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="contacted">Contacted</SelectItem>
+                    <SelectItem value="interested">Interested</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={form.notes} onChange={(e) => updateField("notes", e.target.value)} rows={3} />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!form.first_name.trim() || !form.email.trim()}>
+            <Button onClick={handleSave} disabled={!form.first_name.trim()}>
               {editing ? "Save Changes" : "Add Lead"}
             </Button>
           </DialogFooter>
@@ -366,6 +504,27 @@ export default function Leads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between py-2 border-b">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-right max-w-[60%]">{value}</span>
+    </div>
+  );
+}
+
+function LinkRow({ label, url }: { label: string; url: string }) {
+  const href = url.startsWith("http") ? url : `https://${url}`;
+  return (
+    <div className="flex justify-between py-2 border-b">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-primary flex items-center gap-1 hover:underline">
+        <ExternalLink className="h-3 w-3" /> Link
+      </a>
     </div>
   );
 }
