@@ -102,7 +102,7 @@ export default function Leads() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailTarget, setEmailTarget] = useState<Lead | null>(null);
-  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "" });
+  const [emailForm, setEmailForm] = useState({ subject: "", body: "", from_email: "value@zatics.vision" });
   const [sendingEmail, setSendingEmail] = useState(false);
   const perPage = 10;
 
