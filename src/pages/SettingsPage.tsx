@@ -525,6 +525,9 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* AI Settings */}
+      <AISettingsSection />
     </div>
   );
 }

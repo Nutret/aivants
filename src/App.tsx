@@ -27,6 +27,8 @@ import Projects from "./pages/Projects";
 import Proposals from "./pages/Proposals";
 import Revenue from "./pages/Revenue";
 import TeamMembers from "./pages/TeamMembers";
+import AIAssistant from "./pages/AIAssistant";
+import AIKnowledgeBase from "./pages/AIKnowledgeBase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,6 +76,8 @@ const App = () => (
               <Route path="/proposals" element={<Proposals />} />
               <Route path="/revenue" element={<Revenue />} />
               <Route path="/team" element={<TeamMembers />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
+              <Route path="/knowledge-base" element={<AIKnowledgeBase />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
