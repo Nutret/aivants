@@ -1,9 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, XCircle, FolderOpen, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -148,6 +155,9 @@ function parseCSV(text: string): ParsedLead[] {
 export default function ImportLeads() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const preselectedCategory = searchParams.get("category") || "";
+
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -155,6 +165,32 @@ export default function ImportLeads() {
   const [preview, setPreview] = useState<ParsedLead[]>([]);
   const [detectedCols, setDetectedCols] = useState<string[]>([]);
   const [result, setResult] = useState<{ imported: number; skipped: number; errors: number } | null>(null);
+
+  // Category/Sheet selection
+  const [categories, setCategories] = useState<{ id: string; name: string; industry_type: string }[]>([]);
+  const [sheets, setSheets] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory);
+  const [selectedSheet, setSelectedSheet] = useState("");
+  const [createNewCategory, setCreateNewCategory] = useState(false);
+  const [createNewSheet, setCreateNewSheet] = useState(!preselectedCategory);
+  const [newCatForm, setNewCatForm] = useState({ name: "", industry_type: "Other", description: "" });
+  const [newSheetName, setNewSheetName] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("lead_categories").select("id, name, industry_type").eq("user_id", user.id).order("name").then(({ data }) => {
+      setCategories(data || []);
+      if (!preselectedCategory && (data || []).length === 0) setCreateNewCategory(true);
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!selectedCategory) { setSheets([]); return; }
+    supabase.from("lead_sheets").select("id, name").eq("category_id", selectedCategory).order("name").then(({ data }) => {
+      setSheets(data || []);
+      setCreateNewSheet((data || []).length === 0);
+    });
+  }, [selectedCategory]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -217,7 +253,28 @@ export default function ImportLeads() {
         return;
       }
 
-      // Get existing emails to detect duplicates (only for leads with emails)
+      // Resolve category
+      let categoryId = selectedCategory;
+      if (createNewCategory && newCatForm.name.trim()) {
+        const { data: newCat, error: catErr } = await supabase.from("lead_categories").insert([{
+          user_id: user.id, name: newCatForm.name, industry_type: newCatForm.industry_type, description: newCatForm.description,
+        }]).select("id").single();
+        if (catErr || !newCat) { toast({ title: "Error creating category", description: catErr?.message, variant: "destructive" }); setImporting(false); return; }
+        categoryId = newCat.id;
+      }
+
+      // Resolve sheet
+      let sheetId: string | null = selectedSheet || null;
+      const sheetName = createNewSheet && newSheetName.trim() ? newSheetName : file.name.replace(/\.csv$/i, "");
+      if (categoryId && (createNewSheet || !sheetId)) {
+        const { data: newSheet, error: sheetErr } = await supabase.from("lead_sheets").insert([{
+          user_id: user.id, category_id: categoryId, name: sheetName,
+        }]).select("id").single();
+        if (sheetErr || !newSheet) { toast({ title: "Error creating sheet", description: sheetErr?.message, variant: "destructive" }); setImporting(false); return; }
+        sheetId = newSheet.id;
+      }
+
+      // Get existing emails to detect duplicates
       const { data: existingLeads } = await supabase
         .from("leads")
         .select("email")
@@ -261,6 +318,7 @@ export default function ImportLeads() {
           reviews: lead.reviews ?? 0,
           address: lead.address || null,
           industry: lead.industry || null,
+          sheet_id: sheetId || null,
           status: "new" as const,
         }));
 
@@ -281,6 +339,12 @@ export default function ImportLeads() {
         setProgress(20 + Math.round(((i + batchSize) / newLeads.length) * 80));
       }
 
+      // Update sheet lead_count
+      if (sheetId && imported > 0) {
+        const { data: currentSheet } = await supabase.from("lead_sheets").select("lead_count").eq("id", sheetId).single();
+        await supabase.from("lead_sheets").update({ lead_count: (currentSheet?.lead_count || 0) + imported, updated_at: new Date().toISOString() }).eq("id", sheetId);
+      }
+
       setProgress(100);
       setResult({ imported, skipped, errors });
       toast({ title: "Import complete", description: `${imported} leads imported successfully.` });
@@ -298,9 +362,86 @@ export default function ImportLeads() {
         <p className="text-muted-foreground">Upload a CSV file to import leads</p>
       </div>
 
+      {/* Step 1: Category & Sheet Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Upload File</CardTitle>
+          <CardTitle className="flex items-center gap-2"><FolderOpen className="h-5 w-5" /> Step 1 — Select Category & Sheet</CardTitle>
+          <CardDescription>Organize your imported leads into an industry category</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              {!createNewCategory ? (
+                <div className="space-y-2">
+                  <Select value={selectedCategory} onValueChange={(v) => { setSelectedCategory(v); setSelectedSheet(""); }}>
+                    <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name} — {c.industry_type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewCategory(true)}>
+                    <Plus className="h-3 w-3 mr-1" /> Create new category
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2 rounded-lg border p-3">
+                  <Input placeholder="Category name" value={newCatForm.name} onChange={(e) => setNewCatForm((f) => ({ ...f, name: e.target.value }))} />
+                  <Select value={newCatForm.industry_type} onValueChange={(v) => setNewCatForm((f) => ({ ...f, industry_type: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["Real Estate", "Automotive", "Finance", "Government", "Healthcare", "Technology", "Retail", "Other"].map((ind) => (
+                        <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input placeholder="Description (optional)" value={newCatForm.description} onChange={(e) => setNewCatForm((f) => ({ ...f, description: e.target.value }))} />
+                  {categories.length > 0 && (
+                    <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewCategory(false)}>
+                      Use existing category
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Lead Sheet</Label>
+              {!createNewSheet ? (
+                <div className="space-y-2">
+                  <Select value={selectedSheet} onValueChange={setSelectedSheet}>
+                    <SelectTrigger><SelectValue placeholder="Select a sheet" /></SelectTrigger>
+                    <SelectContent>
+                      {sheets.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewSheet(true)}>
+                    <Plus className="h-3 w-3 mr-1" /> Create new sheet
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Input placeholder="Sheet name (or auto-generated from filename)" value={newSheetName} onChange={(e) => setNewSheetName(e.target.value)} />
+                  {sheets.length > 0 && (
+                    <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={() => setCreateNewSheet(false)}>
+                      Use existing sheet
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Step 2: Upload File */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Step 2 — Upload File</CardTitle>
           <CardDescription>Auto-detects columns from your CSV headers</CardDescription>
         </CardHeader>
         <CardContent>

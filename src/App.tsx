@@ -8,6 +8,9 @@ import { AppLayout } from "@/components/AppLayout";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Leads from "./pages/Leads";
+import LeadCategories from "./pages/LeadCategories";
+import CategoryDetail from "./pages/CategoryDetail";
+import SheetDetail from "./pages/SheetDetail";
 import ImportLeads from "./pages/ImportLeads";
 import Campaigns from "./pages/Campaigns";
 import Templates from "./pages/Templates";
@@ -47,7 +50,10 @@ const App = () => (
               }
             >
               <Route path="/" element={<Index />} />
-              <Route path="/leads" element={<Leads />} />
+              <Route path="/leads" element={<LeadCategories />} />
+              <Route path="/leads/all" element={<Leads />} />
+              <Route path="/leads/category/:categoryId" element={<CategoryDetail />} />
+              <Route path="/leads/sheet/:sheetId" element={<SheetDetail />} />
               <Route path="/import" element={<ImportLeads />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/templates" element={<Templates />} />

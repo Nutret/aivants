@@ -555,6 +555,83 @@ export type Database = {
           },
         ]
       }
+      lead_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          industry_type: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry_type?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          industry_type?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lead_sheets: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          lead_count: number
+          name: string
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_count?: number
+          name: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_count?: number
+          name?: string
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_sheets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "lead_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
@@ -574,6 +651,7 @@ export type Database = {
           rating: number | null
           reviews: number | null
           score: number | null
+          sheet_id: string | null
           source: string | null
           status: string
           tags: string[] | null
@@ -601,6 +679,7 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           score?: number | null
+          sheet_id?: string | null
           source?: string | null
           status?: string
           tags?: string[] | null
@@ -628,6 +707,7 @@ export type Database = {
           rating?: number | null
           reviews?: number | null
           score?: number | null
+          sheet_id?: string | null
           source?: string | null
           status?: string
           tags?: string[] | null
@@ -643,6 +723,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_sheet_id_fkey"
+            columns: ["sheet_id"]
+            isOneToOne: false
+            referencedRelation: "lead_sheets"
             referencedColumns: ["id"]
           },
         ]
