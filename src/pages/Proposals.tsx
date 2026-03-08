@@ -194,7 +194,7 @@ export default function Proposals() {
 
     setUploading(true);
 
-    const payload: Record<string, any> = {
+    const payload = {
       user_id: user.id,
       name: form.name.trim(),
       client_id: form.client_id || null,
