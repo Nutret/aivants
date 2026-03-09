@@ -118,13 +118,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Zap className="h-4 w-4 text-primary-foreground" />
-          </div>
-          {!collapsed && (
-            <span className="text-lg font-bold tracking-tight text-sidebar-foreground">
-              Aivants
-            </span>
+          {collapsed ? (
+            <img src="/logo.png" alt="Aivants" className="h-8 w-8 object-contain" />
+          ) : (
+            <img src="/logo.png" alt="Aivants" className="h-9 object-contain" />
           )}
         </div>
       </SidebarHeader>
