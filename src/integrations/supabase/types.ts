@@ -161,6 +161,45 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_rules: {
+        Row: {
+          action_type: string
+          condition_json: Json | null
+          created_at: string
+          delay_hours: number
+          id: string
+          is_active: boolean
+          name: string
+          trigger_event: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          condition_json?: Json | null
+          created_at?: string
+          delay_hours?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          trigger_event: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          condition_json?: Json | null
+          created_at?: string
+          delay_hours?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          trigger_event?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       campaign_leads: {
         Row: {
           added_at: string
@@ -857,6 +896,84 @@ export type Database = {
           },
         ]
       }
+      general_settings: {
+        Row: {
+          brand_primary_color: string
+          brand_secondary_color: string
+          company_name: string
+          created_at: string
+          currency: string
+          date_format: string
+          id: string
+          language: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_primary_color?: string
+          brand_secondary_color?: string
+          company_name?: string
+          created_at?: string
+          currency?: string
+          date_format?: string
+          id?: string
+          language?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_primary_color?: string
+          brand_secondary_color?: string
+          company_name?: string
+          created_at?: string
+          currency?: string
+          date_format?: string
+          id?: string
+          language?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integration_settings: {
+        Row: {
+          api_key: string | null
+          config: Json | null
+          connected_at: string | null
+          created_at: string
+          id: string
+          integration_name: string
+          is_connected: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key?: string | null
+          config?: Json | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          integration_name: string
+          is_connected?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string | null
+          config?: Json | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          integration_name?: string
+          is_connected?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_categories: {
         Row: {
           color: string | null
@@ -1035,6 +1152,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_settings: {
+        Row: {
+          channel: string
+          created_at: string
+          enabled: boolean
+          event_type: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          enabled?: boolean
+          event_type: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          enabled?: boolean
+          event_type?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       outreach_scripts: {
         Row: {
@@ -1375,6 +1522,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      security_settings: {
+        Row: {
+          created_at: string
+          id: string
+          ip_whitelist: string[] | null
+          last_api_key_rotation: string | null
+          session_timeout_minutes: number
+          two_factor_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_whitelist?: string[] | null
+          last_api_key_rotation?: string | null
+          session_timeout_minutes?: number
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_whitelist?: string[] | null
+          last_api_key_rotation?: string | null
+          session_timeout_minutes?: number
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       system_logs: {
         Row: {
