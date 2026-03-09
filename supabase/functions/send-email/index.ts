@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
       const { data: settings } = await serviceClient
         .from("user_settings")
         .select("from_email")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .single();
       senderEmail = settings?.from_email || null;
     }
