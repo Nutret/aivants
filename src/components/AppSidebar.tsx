@@ -117,10 +117,9 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          {collapsed ? (
-            <img src="/logo.png" alt="Aivants" className="h-8 w-8 object-contain" />
-          ) : (
-            <img src="/logo.png" alt="Aivants" className="h-9 object-contain" />
+          <img src="/logo-light.png" alt="Aivants" className="h-8 object-contain" />
+          {!collapsed && (
+            <span className="text-lg font-semibold tracking-tight">Aivants</span>
           )}
         </div>
       </SidebarHeader>
