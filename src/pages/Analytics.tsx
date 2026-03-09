@@ -322,7 +322,7 @@ export default function Analytics() {
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Total Pipeline Value</div>
-                  <div className="text-2xl font-bold">${summary.totalPipelineValue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">₹{summary.totalPipelineValue.toLocaleString("en-IN")}</div>
                 </CardContent>
               </Card>
               <Card>
