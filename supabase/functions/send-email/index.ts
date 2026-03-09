@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     );
 
     await serviceClient.from("email_logs").insert({
-      user_id: user.id,
+      user_id: userId,
       lead_id: lead_id || null,
       campaign_id: campaign_id || null,
       status: "sent",
