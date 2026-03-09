@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
-import { Bot, Send, Loader2, X, Sparkles } from "lucide-react";
+import { Bot, Send, Loader2, X, MessageCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -23,7 +23,6 @@ export function FloatingAIWidget() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Check widget setting
   useEffect(() => {
     if (!user) return;
     supabase
@@ -40,7 +39,6 @@ export function FloatingAIWidget() {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Don't show on AI Assistant page or if disabled
   if (!enabled || location.pathname === "/ai-assistant") return null;
 
   const sendMessage = async () => {
@@ -66,54 +64,51 @@ export function FloatingAIWidget() {
 
   return (
     <>
-      {/* Floating button */}
       <AnimatePresence>
         {!open && (
           <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-foreground text-background shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity duration-150"
             onClick={() => setOpen(true)}
           >
-            <Sparkles className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Chat panel */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-96 h-[32rem] bg-card border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            transition={{ duration: 0.15 }}
+            className="fixed bottom-6 right-6 z-50 w-[380px] h-[30rem] bg-card border rounded-2xl shadow-lg flex flex-col overflow-hidden"
           >
-            {/* Header */}
-            <div className="p-3 border-b flex items-center justify-between bg-primary/5">
+            <div className="px-4 py-3 border-b flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <span className="font-semibold text-sm">AI Assistant</span>
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">AI Assistant</span>
               </div>
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setOpen(false)}>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground" onClick={() => setOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Messages */}
-            <ScrollArea className="flex-1 p-3">
+            <ScrollArea className="flex-1 p-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
-                  <Sparkles className="h-8 w-8 text-primary/40" />
-                  <p className="text-xs text-muted-foreground text-center">Ask me anything about your business</p>
+                <div className="flex flex-col items-center justify-center h-full gap-2 py-12">
+                  <Bot className="h-6 w-6 text-muted-foreground/30" />
+                  <p className="text-xs text-muted-foreground">Ask anything about your business</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${
-                        m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        m.role === "user" ? "bg-foreground text-background" : "bg-muted"
                       }`}>
                         {m.role === "assistant" ? (
                           <div className="prose prose-xs dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
@@ -137,7 +132,6 @@ export function FloatingAIWidget() {
               )}
             </ScrollArea>
 
-            {/* Input */}
             <div className="p-3 border-t">
               <div className="flex gap-2">
                 <Input
@@ -148,7 +142,7 @@ export function FloatingAIWidget() {
                   className="text-xs h-8"
                   disabled={loading}
                 />
-                <Button onClick={sendMessage} disabled={loading || !input.trim()} size="icon" className="h-8 w-8">
+                <Button onClick={sendMessage} disabled={loading || !input.trim()} size="icon" className="h-8 w-8 rounded-lg">
                   {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
                 </Button>
               </div>
