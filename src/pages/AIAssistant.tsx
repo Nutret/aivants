@@ -85,6 +85,7 @@ export default function AIAssistant() {
     setInput("");
 
     let convId = activeConvId;
+    let isNewConv = false;
     if (!convId && user) {
       const { data } = await supabase
         .from("chat_conversations")
@@ -92,8 +93,9 @@ export default function AIAssistant() {
         .select().single();
       if (data) {
         convId = (data as any).id;
-        setActiveConvId(convId);
+        isNewConv = true;
         setConversations(prev => [(data as any as Conversation), ...prev]);
+        setActiveConvId(convId);
       }
     }
 
@@ -200,7 +202,7 @@ export default function AIAssistant() {
             <Bot className="h-4.5 w-4.5 text-primary-foreground" />
           </div>
           <div className="min-w-0">
-            <h2 className="font-semibold text-sm leading-tight">AI Command Assistant</h2>
+            <h2 className="font-semibold text-sm leading-tight">Aivants AI Assistant</h2>
             <p className="text-xs text-muted-foreground truncate">Query your business data in natural language</p>
           </div>
           <div className="ml-auto">
@@ -274,7 +276,7 @@ export default function AIAssistant() {
                           : "bg-muted rounded-bl-md"
                       }`}>
                         {m.role === "assistant" ? (
-                          <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed">
+                          <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-1.5 [&_th]:bg-muted [&_th]:text-left [&_th]:text-xs [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-1.5 [&_td]:text-xs">
                             <ReactMarkdown>{m.content}</ReactMarkdown>
                           </div>
                         ) : (

@@ -54,7 +54,7 @@ const operationsItems = [
   { title: "Scripts", url: "/scripts", icon: ScrollText },
   { title: "Content", url: "/content", icon: FolderOpen },
   { title: "Sequences", url: "/sequences", icon: Clock },
-  { title: "Follow-Ups", url: "/followups", icon: CalendarClock },
+  { title: "Follow-Ups", url: "/follow-ups", icon: CalendarClock },
 ];
 
 const intelligenceItems = [

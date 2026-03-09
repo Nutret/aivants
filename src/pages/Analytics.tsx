@@ -221,7 +221,7 @@ export default function Analytics() {
     { label: "Reply Rate", value: `${summary.avgReplyRate}%`, icon: MessageSquare, color: "text-chart-3" },
     { label: "Meetings", value: summary.meetingsBooked.toString(), icon: Target, color: "text-chart-4" },
     { label: "Clients Won", value: summary.clientsWon.toString(), icon: Users, color: "text-success" },
-    { label: "Pipeline Value", value: `$${summary.totalPipelineValue.toLocaleString()}`, icon: DollarSign, color: "text-chart-5" },
+    { label: "Pipeline Value", value: `₹${summary.totalPipelineValue.toLocaleString("en-IN")}`, icon: DollarSign, color: "text-chart-5" },
   ];
 
   if (loading) {
@@ -322,13 +322,13 @@ export default function Analytics() {
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Total Pipeline Value</div>
-                  <div className="text-2xl font-bold">${summary.totalPipelineValue.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">₹{summary.totalPipelineValue.toLocaleString("en-IN")}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Avg Deal Size</div>
-                  <div className="text-2xl font-bold">${summary.avgDealSize.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">₹{summary.avgDealSize.toLocaleString("en-IN")}</div>
                 </CardContent>
               </Card>
               <Card>

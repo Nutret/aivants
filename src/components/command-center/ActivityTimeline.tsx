@@ -37,7 +37,7 @@ export function ActivityTimeline({ items }: { items: ActivityItem[] }) {
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{item.description}</p>
+                      <p className="text-sm truncate" title={item.description}>{item.description}</p>
                       <p className="text-xs text-muted-foreground">{timeStr}</p>
                     </div>
                   </div>
