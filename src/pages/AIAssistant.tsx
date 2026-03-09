@@ -202,7 +202,7 @@ export default function AIAssistant() {
             <Bot className="h-4.5 w-4.5 text-primary-foreground" />
           </div>
           <div className="min-w-0">
-            <h2 className="font-semibold text-sm leading-tight">AI Command Assistant</h2>
+            <h2 className="font-semibold text-sm leading-tight">Aivants AI Assistant</h2>
             <p className="text-xs text-muted-foreground truncate">Query your business data in natural language</p>
           </div>
           <div className="ml-auto">
