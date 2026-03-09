@@ -15,7 +15,6 @@ import {
   Users, Mail, MessageSquare, CalendarCheck, Briefcase, FolderKanban,
   IndianRupee, CreditCard, Wallet, UsersRound, Clock, Megaphone, Eye, Reply, Loader2,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const fmt = (v: number) => `₹${v.toLocaleString("en-IN")}`;
 
@@ -24,7 +23,6 @@ export default function Index() {
   const data = useCommandCenterData();
   const firstName = user?.user_metadata?.first_name || user?.email?.split("@")[0] || "there";
 
-  // Build business context string for AI features
   const businessContext = useMemo(() => {
     const lo = data.leadsOverview;
     const co = data.clientsOverview;
@@ -47,79 +45,75 @@ High value leads: ${data.highValueLeads.length}`;
   if (data.loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-8 pb-8 max-w-[1400px]">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Command Center</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {firstName}. Here's your business at a glance.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Welcome back, {firstName}
+        </p>
       </div>
 
       {/* Quick Actions */}
       <QuickActions />
 
-      {/* Section 1 — Leads Overview */}
-      <KPISection title="Leads Overview">
-        <KPICard label="Leads Today" value={data.leadsOverview.leadsToday} icon={Users} color="text-primary" />
-        <KPICard label="New Leads" value={data.leadsOverview.newLeads} icon={Users} color="text-accent" />
-        <KPICard label="Emails Sent" value={data.leadsOverview.emailsSent} icon={Mail} color="text-warning" />
+      {/* Leads Overview */}
+      <KPISection title="Leads">
+        <KPICard label="Today" value={data.leadsOverview.leadsToday} icon={Users} color="text-primary" />
+        <KPICard label="New Leads" value={data.leadsOverview.newLeads} icon={Users} color="text-success" />
+        <KPICard label="Emails Sent" value={data.leadsOverview.emailsSent} icon={Mail} color="text-primary" />
         <KPICard label="Replies" value={data.leadsOverview.replies} icon={MessageSquare} color="text-success" />
-        <KPICard label="Meetings Booked" value={data.leadsOverview.meetingsBooked} icon={CalendarCheck} color="text-primary" />
+        <KPICard label="Meetings" value={data.leadsOverview.meetingsBooked} icon={CalendarCheck} color="text-primary" />
       </KPISection>
 
-      {/* Section 2 — Clients */}
+      {/* Clients */}
       <KPISection title="Clients">
-        <KPICard label="Active Clients" value={data.clientsOverview.activeClients} icon={Briefcase} color="text-accent" />
-        <KPICard label="Projects Running" value={data.clientsOverview.activeProjects} icon={FolderKanban} color="text-primary" />
+        <KPICard label="Active" value={data.clientsOverview.activeClients} icon={Briefcase} color="text-primary" />
+        <KPICard label="Projects" value={data.clientsOverview.activeProjects} icon={FolderKanban} color="text-primary" />
         <KPICard label="Pending Payments" value={data.clientsOverview.pendingPayments} icon={CreditCard} color="text-warning" />
       </KPISection>
 
-      {/* Section 3 — Revenue Snapshot */}
-      <KPISection title="Revenue Snapshot">
-        <KPICard label="Monthly Revenue" value={fmt(data.revenueSnapshot.monthlyRevenue)} icon={IndianRupee} color="text-success" />
-        <KPICard label="Client Retainers" value={fmt(data.revenueSnapshot.retainers)} icon={IndianRupee} color="text-accent" />
+      {/* Revenue */}
+      <KPISection title="Revenue">
+        <KPICard label="Monthly" value={fmt(data.revenueSnapshot.monthlyRevenue)} icon={IndianRupee} color="text-success" />
+        <KPICard label="Retainers" value={fmt(data.revenueSnapshot.retainers)} icon={IndianRupee} color="text-primary" />
         <KPICard label="Pending" value={fmt(data.revenueSnapshot.pendingPayments)} icon={CreditCard} color="text-warning" />
         <KPICard label="Net Profit" value={fmt(data.revenueSnapshot.profit)} icon={Wallet} color={data.revenueSnapshot.profit >= 0 ? "text-success" : "text-destructive"} />
       </KPISection>
 
-      {/* Section 4 — Team Activity */}
-      <KPISection title="Team Activity">
-        <KPICard label="Active Members" value={data.teamActivity.activeMembers} icon={UsersRound} color="text-primary" subtext={`of ${data.teamActivity.totalMembers} total`} />
-        <KPICard label="Deadlines This Week" value={data.teamActivity.projectsNearDeadline} icon={Clock} color="text-warning" />
-      </KPISection>
+      {/* Team & Outreach */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <KPISection title="Team">
+          <KPICard label="Active" value={data.teamActivity.activeMembers} icon={UsersRound} color="text-primary" subtext={`of ${data.teamActivity.totalMembers}`} />
+          <KPICard label="Deadlines" value={data.teamActivity.projectsNearDeadline} icon={Clock} color="text-warning" />
+        </KPISection>
+        <KPISection title="Outreach">
+          <KPICard label="Campaigns" value={data.outreachEngine.activeCampaigns} icon={Megaphone} color="text-primary" subtext={`of ${data.outreachEngine.totalCampaigns}`} />
+          <KPICard label="Open Rate" value={`${data.outreachEngine.openRate.toFixed(0)}%`} icon={Eye} color="text-success" />
+        </KPISection>
+      </div>
 
-      {/* Section 5 — Outreach Engine */}
-      <KPISection title="Outreach Engine">
-        <KPICard label="Campaigns" value={data.outreachEngine.activeCampaigns} icon={Megaphone} color="text-primary" subtext={`of ${data.outreachEngine.totalCampaigns} total`} />
-        <KPICard label="Emails Today" value={data.outreachEngine.emailsToday} icon={Mail} color="text-accent" />
-        <KPICard label="Open Rate" value={`${data.outreachEngine.openRate.toFixed(0)}%`} icon={Eye} color="text-success" />
-        <KPICard label="Reply Rate" value={`${data.outreachEngine.replyRate.toFixed(0)}%`} icon={Reply} color="text-warning" />
-      </KPISection>
-
-      {/* Row: Pipeline + Activity + Client Health */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* Pipeline + Activity + Client Health */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <DealPipelineVisual stages={data.dealPipeline} />
         <ActivityTimeline items={data.activityTimeline} />
         <ClientHealthTable clients={data.clientHealth} />
       </div>
 
-      {/* Row: AI Opportunity Scanner + AI Assistant */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* AI Insights */}
+      <div className="grid gap-6 lg:grid-cols-2">
         <AIOpportunityScanner businessContext={businessContext} />
         <AIAssistant businessContext={businessContext} />
       </div>
 
-      {/* Row: Revenue Prediction + Financial Health + High Value Leads */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* Financial */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <RevenuePrediction
           current={data.revenueProjection.current}
           nextMonth={data.revenueProjection.nextMonth}
@@ -130,8 +124,8 @@ High value leads: ${data.highValueLeads.length}`;
         <HighValueLeads leads={data.highValueLeads} />
       </div>
 
-      {/* Row: Lead Sources + Automation Monitor + System Health */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* System */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <LeadSources sources={data.leadSources} />
         <AutomationMonitor data={data.automationMonitor} />
         <SystemHealth />
