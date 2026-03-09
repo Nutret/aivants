@@ -372,6 +372,26 @@ export function CampaignDetailDialog({ open, onOpenChange, campaignId, onRefresh
                 onChange={(e) => setLeadSearch(e.target.value)}
               />
             </div>
+            {/* Select All */}
+            {(() => {
+              const selectableLeads = filteredAllLeads.filter(l => !campaignLeads.some(cl => cl.id === l.id));
+              const allSelected = selectableLeads.length > 0 && selectableLeads.every(l => selectedLeadIds.has(l.id));
+              return selectableLeads.length > 0 ? (
+                <label className="flex items-center gap-2 px-1 py-1.5 text-sm cursor-pointer">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={() => {
+                      if (allSelected) {
+                        setSelectedLeadIds(new Set());
+                      } else {
+                        setSelectedLeadIds(new Set(selectableLeads.map(l => l.id)));
+                      }
+                    }}
+                  />
+                  <span className="font-medium">Select All ({selectableLeads.length})</span>
+                </label>
+              ) : null;
+            })()}
             <ScrollArea className="flex-1 max-h-[50vh]">
               <div className="space-y-1">
                 {filteredAllLeads.map((lead) => {
