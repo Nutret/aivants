@@ -8,7 +8,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Zap,
   ScrollText,
   FolderOpen,
   Clock,
