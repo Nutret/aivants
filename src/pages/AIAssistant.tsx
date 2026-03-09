@@ -85,6 +85,7 @@ export default function AIAssistant() {
     setInput("");
 
     let convId = activeConvId;
+    let isNewConv = false;
     if (!convId && user) {
       const { data } = await supabase
         .from("chat_conversations")
@@ -92,8 +93,9 @@ export default function AIAssistant() {
         .select().single();
       if (data) {
         convId = (data as any).id;
-        setActiveConvId(convId);
+        isNewConv = true;
         setConversations(prev => [(data as any as Conversation), ...prev]);
+        setActiveConvId(convId);
       }
     }
 
