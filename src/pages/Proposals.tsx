@@ -452,12 +452,12 @@ export default function Proposals() {
               <TableBody>
                 {filtered.map((proposal) => (
                   <TableRow key={proposal.id}>
-                    <TableCell>
+                    <TableCell className="max-w-[200px]">
                       <div>
-                        <p className="font-medium">{proposal.name}</p>
+                        <p className="font-medium truncate">{proposal.name}</p>
                         {proposal.document_name && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <FileText className="h-3 w-3" />{proposal.document_name}
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 truncate" title={proposal.document_name}>
+                            <FileText className="h-3 w-3 shrink-0" /><span className="truncate">{proposal.document_name}</span>
                           </p>
                         )}
                       </div>
