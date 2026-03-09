@@ -1331,6 +1331,36 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_chat_history: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          pending_action: Json | null
+          role: string
+          telegram_chat_id: number
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          pending_action?: Json | null
+          role?: string
+          telegram_chat_id: number
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          pending_action?: Json | null
+          role?: string
+          telegram_chat_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       telegram_users: {
         Row: {
           id: string
