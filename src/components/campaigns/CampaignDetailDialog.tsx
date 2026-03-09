@@ -336,7 +336,7 @@ export function CampaignDetailDialog({ open, onOpenChange, campaignId, onRefresh
                           {lead.company_name && ` · ${lead.company_name}`}
                         </div>
                         {lead.email.includes("@placeholder.local") && (
-                          <Badge variant="outline" className="text-[10px] mt-1 text-amber-600 border-amber-200">
+                          <Badge variant="outline" className="text-[10px] mt-1 text-warning border-warning/30">
                             No valid email
                           </Badge>
                         )}

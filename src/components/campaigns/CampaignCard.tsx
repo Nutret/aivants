@@ -20,9 +20,9 @@ interface CampaignCardProps {
 
 function getStatusBadge(status: string) {
   switch (status) {
-    case "active": return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>;
-    case "paused": return <Badge className="bg-amber-50 text-amber-700 border-amber-200">Paused</Badge>;
-    case "completed": return <Badge className="bg-blue-50 text-blue-700 border-blue-200">Completed</Badge>;
+    case "active": return <Badge className="bg-success/10 text-success border-success/20">Active</Badge>;
+    case "paused": return <Badge className="bg-warning/10 text-warning border-warning/20">Paused</Badge>;
+    case "completed": return <Badge className="bg-primary/10 text-primary border-primary/20">Completed</Badge>;
     case "draft": return <Badge variant="secondary">Draft</Badge>;
     default: return <Badge variant="outline">{status}</Badge>;
   }
