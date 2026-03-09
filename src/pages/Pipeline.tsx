@@ -201,7 +201,7 @@ export default function Pipeline() {
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading pipeline…</p>
+        <div className="flex items-center gap-2 text-muted-foreground py-12 justify-center"><Loader2 className="h-5 w-5 animate-spin" /> Loading pipeline…</div>
       ) : leads.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">

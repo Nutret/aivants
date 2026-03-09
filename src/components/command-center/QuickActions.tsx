@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserPlus, Mail, FileText, Briefcase, Megaphone, FolderKanban } from "lucide-react";
 
 const actions = [
-  { label: "Add Lead", icon: UserPlus, path: "/leads" },
+  { label: "Add Lead", icon: UserPlus, path: "/leads/all" },
   { label: "Send Email", icon: Mail, path: "/campaigns" },
   { label: "Create Proposal", icon: FileText, path: "/proposals" },
   { label: "New Client", icon: Briefcase, path: "/clients" },

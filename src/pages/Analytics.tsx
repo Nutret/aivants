@@ -328,7 +328,7 @@ export default function Analytics() {
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm text-muted-foreground">Avg Deal Size</div>
-                  <div className="text-2xl font-bold">${summary.avgDealSize.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">₹{summary.avgDealSize.toLocaleString("en-IN")}</div>
                 </CardContent>
               </Card>
               <Card>

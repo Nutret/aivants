@@ -471,13 +471,20 @@ export default function Proposals() {
                     <TableCell>{format(new Date(proposal.created_at), "MMM d, yyyy")}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {proposal.document_url && (
-                          <Button variant="ghost" size="icon" asChild>
-                            <a href={proposal.document_url} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (proposal.document_url) {
+                              window.open(proposal.document_url, "_blank");
+                            } else {
+                              openEdit(proposal);
+                            }
+                          }}
+                          title={proposal.document_url ? "View document" : "View proposal details"}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => openShare(proposal)}>
                           <Send className="h-4 w-4" />
                         </Button>

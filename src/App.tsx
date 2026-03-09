@@ -67,7 +67,8 @@ const App = () => (
               <Route path="/scripts" element={<Scripts />} />
               <Route path="/content" element={<ContentLibrary />} />
               <Route path="/sequences" element={<Sequences />} />
-              <Route path="/followups" element={<FollowUps />} />
+              <Route path="/follow-ups" element={<FollowUps />} />
+              <Route path="/followups" element={<Navigate to="/follow-ups" replace />} />
               <Route path="/pipeline" element={<Pipeline />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/orchestrator" element={<Orchestrator />} />
