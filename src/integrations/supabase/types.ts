@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_memory: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          key: string
+          memory_type: string
+          metadata: Json | null
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key: string
+          memory_type?: string
+          metadata?: Json | null
+          updated_at?: string
+          user_id: string
+          value?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key?: string
+          memory_type?: string
+          metadata?: Json | null
+          updated_at?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           api_key: string | null
@@ -80,6 +116,48 @@ export type Database = {
           updated_at?: string
           user_id?: string
           widget_enabled?: boolean
+        }
+        Relationships: []
+      }
+      automation_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_type: string
+          payload: Json | null
+          result: Json | null
+          scheduled_for: string
+          started_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          payload?: Json | null
+          result?: Json | null
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          payload?: Json | null
+          result?: Json | null
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1298,6 +1376,42 @@ export type Database = {
           },
         ]
       }
+      system_logs: {
+        Row: {
+          action: string
+          category: string
+          created_at: string
+          details: Json | null
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          category?: string
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          category?: string
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           created_at: string
@@ -1391,6 +1505,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string
@@ -1426,10 +1561,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "team_member" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1556,6 +1697,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "team_member", "viewer"],
+    },
   },
 } as const
