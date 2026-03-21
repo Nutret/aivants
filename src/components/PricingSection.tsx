@@ -73,14 +73,14 @@ export function PricingSection() {
             }`}
           >
             {plan.highlight && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full whitespace-nowrap">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#6b5e4e] text-white text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full whitespace-nowrap">
                 Most Popular
               </div>
             )}
             <h3 className="font-medium">{plan.name}</h3>
             <div className="text-3xl font-semibold mt-4">{plan.price}</div>
             <p className="text-sm text-gray-500 mt-2 flex-1">{plan.desc}</p>
-            <button className={`mt-6 w-full py-2.5 rounded-xl font-medium transition-colors ${plan.highlight ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90'}`}>
+            <button className={`mt-6 w-full py-2.5 rounded-xl font-medium transition-colors ${plan.highlight ? 'bg-[#6b5e4e] text-white hover:bg-[#5a4e40]' : 'bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90'}`}>
               Continue
             </button>
           </div>
