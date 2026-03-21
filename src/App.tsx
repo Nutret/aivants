@@ -30,6 +30,7 @@ import Revenue from "./pages/Revenue";
 import TeamMembers from "./pages/TeamMembers";
 import AIAssistant from "./pages/AIAssistant";
 import AIKnowledgeBase from "./pages/AIKnowledgeBase";
+import WhatsAppIntegration from "./pages/WhatsAppIntegration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ const App = () => (
               <Route path="/team" element={<TeamMembers />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/knowledge-base" element={<AIKnowledgeBase />} />
+              <Route path="/whatsapp" element={<WhatsAppIntegration />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

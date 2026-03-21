@@ -51,7 +51,7 @@ High value leads: ${data.highValueLeads.length}`;
   }
 
   return (
-    <div className="space-y-8 pb-8 max-w-[1400px]">
+    <div className="space-y-6 sm:space-y-8 pb-8 max-w-[1400px] mx-auto w-full">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -88,7 +88,7 @@ High value leads: ${data.highValueLeads.length}`;
       </KPISection>
 
       {/* Team & Outreach */}
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-2">
         <KPISection title="Team">
           <KPICard label="Active" value={data.teamActivity.activeMembers} icon={UsersRound} color="text-primary" subtext={`of ${data.teamActivity.totalMembers}`} />
           <KPICard label="Deadlines" value={data.teamActivity.projectsNearDeadline} icon={Clock} color="text-warning" />
@@ -100,20 +100,20 @@ High value leads: ${data.highValueLeads.length}`;
       </div>
 
       {/* Pipeline + Activity + Client Health */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <DealPipelineVisual stages={data.dealPipeline} />
         <ActivityTimeline items={data.activityTimeline} />
         <ClientHealthTable clients={data.clientHealth} />
       </div>
 
       {/* AI Insights */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <AIOpportunityScanner businessContext={businessContext} />
         <AIAssistant businessContext={businessContext} />
       </div>
 
       {/* Financial */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <RevenuePrediction
           current={data.revenueProjection.current}
           nextMonth={data.revenueProjection.nextMonth}
@@ -125,7 +125,7 @@ High value leads: ${data.highValueLeads.length}`;
       </div>
 
       {/* System */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <LeadSources sources={data.leadSources} />
         <AutomationMonitor data={data.automationMonitor} />
         <SystemHealth />

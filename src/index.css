@@ -1,12 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @layer base {
   :root {
-    --background: 0 0% 99%;
+    --background: 240 5% 96%;
     --foreground: 220 14% 10%;
 
     --card: 0 0% 100%;
@@ -40,7 +39,7 @@
     --input: 220 13% 91%;
     --ring: 221 83% 53%;
 
-    --radius: 0.625rem;
+    --radius: 0.85rem;
 
     --sidebar-background: 220 14% 98%;
     --sidebar-foreground: 220 9% 46%;

@@ -34,7 +34,7 @@ export function KPISection({ title, children }: { title: string; children: React
       {title && (
         <h3 className="text-sm font-medium text-muted-foreground mb-4">{title}</h3>
       )}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {children}
       </div>
     </div>

@@ -12,7 +12,7 @@ import { UsersPermissionsSettings } from "@/components/settings/UsersPermissions
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { DeveloperSettings } from "@/components/settings/DeveloperSettings";
 import { AccountSettings } from "@/components/settings/AccountSettings";
-import { Sparkles } from "lucide-react";
+import { Sparkle } from "@phosphor-icons/react";
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>("general");
@@ -31,7 +31,10 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />AI & Model APIs
+                <div className="h-10 w-10 min-w-10 rounded-xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 flex items-center justify-center border border-primary/10 shadow-sm mr-3">
+                  <Sparkle weight="duotone" className="h-5 w-5 text-indigo-500 drop-shadow-sm" />
+                </div>
+                AI & Model APIs
               </h1>
               <p className="text-muted-foreground text-sm">Configure AI providers, models, and behavior</p>
             </div>

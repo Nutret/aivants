@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User, Eye, EyeOff, Check, X, ArrowLeft } from "lucide-react";
 import { z } from "zod";
+import { PricingSection } from "@/components/PricingSection";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address").max(255),
@@ -156,6 +158,17 @@ export default function Auth() {
               <div className="text-xs text-muted-foreground mt-1">Client View</div>
             </div>
           </div>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="mt-12 h-11 rounded-full px-8 bg-zinc-900 text-white hover:bg-zinc-900/90 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-100/90 transition-all shadow-md font-medium border-0">
+                View Pricing Plans
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-none bg-transparent shadow-none [&>button]:right-4 [&>button]:top-4 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-2">
+              <PricingSection />
+            </DialogContent>
+          </Dialog>
         </div>
         <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5" />
         <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5" />
