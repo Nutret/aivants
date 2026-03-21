@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import LandingLight from "./pages/LandingLight";
 import Leads from "./pages/Leads";
 import LeadCategories from "./pages/LeadCategories";
 import CategoryDetail from "./pages/CategoryDetail";
@@ -53,7 +54,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<LandingLight />} />
             <Route
               element={
                 <ProtectedRoute>
