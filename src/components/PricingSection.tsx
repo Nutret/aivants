@@ -68,11 +68,15 @@ export function PricingSection() {
         ].map((plan: any, i) => (
           <div
             key={i}
-            className={`border rounded-2xl p-6 transition-transform flex flex-col ${
+            className={`border rounded-2xl p-6 transition-transform flex flex-col relative ${
               plan.highlight ? "border-black dark:border-white shadow-xl scale-105" : "border-gray-200 dark:border-zinc-800"
             }`}
           >
-            {plan.highlight && <p className="text-xs mb-2 font-semibold tracking-wide uppercase text-primary">Most Popular</p>}
+            {plan.highlight && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full whitespace-nowrap">
+                Most Popular
+              </div>
+            )}
             <h3 className="font-medium">{plan.name}</h3>
             <div className="text-3xl font-semibold mt-4">{plan.price}</div>
             <p className="text-sm text-gray-500 mt-2 flex-1">{plan.desc}</p>

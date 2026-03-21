@@ -47,7 +47,7 @@ import {
 const navigationStructure = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: SquaresFour,
   },
   {

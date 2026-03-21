@@ -1,13 +1,12 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Mail, Lock, User, Eye, EyeOff, Check, X, ArrowLeft } from "lucide-react";
 import { z } from "zod";
-import { PricingSection } from "@/components/PricingSection";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const loginSchema = z.object({
@@ -44,8 +43,9 @@ const passwordChecks = [
 ];
 
 export default function Auth() {
+  const location = useLocation();
   const { user, loading, signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(location.state?.mode || "login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -74,7 +74,7 @@ export default function Auth() {
     );
   }
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
 
   const resetForm = () => {
     setFirstName("");
@@ -159,16 +159,7 @@ export default function Auth() {
             </div>
           </div>
           
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="mt-12 h-11 rounded-full px-8 bg-zinc-900 text-white hover:bg-zinc-900/90 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-100/90 transition-all shadow-md font-medium border-0">
-                View Pricing Plans
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-none bg-transparent shadow-none [&>button]:right-4 [&>button]:top-4 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:p-2">
-              <PricingSection />
-            </DialogContent>
-          </Dialog>
+
         </div>
         <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5" />
         <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5" />
