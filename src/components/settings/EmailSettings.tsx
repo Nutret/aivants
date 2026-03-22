@@ -10,6 +10,26 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Save, Loader2, Send, CheckCircle2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
+// In production point VITE_EMAIL_API_URL at your deployed email server
+// e.g. https://your-email-server.railway.app
+// In dev the Vite proxy forwards /api → localhost:3001
+const EMAIL_API = (import.meta.env.VITE_EMAIL_API_URL ?? "").replace(/\/$/, "");
+
+/** Fetch wrapper that gives a helpful error when the server returns HTML (not running) */
+async function apiFetch(path: string, init: RequestInit) {
+  const url = `${EMAIL_API}${path}`;
+  const res = await fetch(url, init);
+  const ct = res.headers.get("content-type") ?? "";
+  if (!ct.includes("application/json")) {
+    throw new Error(
+      res.status === 404 || res.status === 502
+        ? "Email server not reachable. Make sure it is deployed and VITE_EMAIL_API_URL is set."
+        : `Server returned ${res.status} (non-JSON). Email server may not be running.`
+    );
+  }
+  return res;
+}
+
 export function EmailSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -121,7 +141,7 @@ export function EmailSettings() {
     }
     setVerifying(true);
     try {
-      const res = await fetch("/api/test-smtp", {
+      const res = await apiFetch("/api/test-smtp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ smtp_email: smtpEmail.trim(), smtp_password: smtpPassword.trim() }),
@@ -148,7 +168,7 @@ export function EmailSettings() {
 
     setSending(true);
     try {
-      const res = await fetch("/api/send-email", {
+      const res = await apiFetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
